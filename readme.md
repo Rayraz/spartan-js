@@ -1,11 +1,11 @@
 # SpartanJS - 0.1.0
 
-SpartanJS is a collection of simple no-nonsense JavaScript components.
+SpartanJS is a collection of small, simple, no-nonsense, but functional JavaScript components.
 
 These components are designed to be compact and functional, without adding things you're not going to need.
 Each component focusses on doing one task and one task only without the unnecessary bulk from endless lists of convenience methods.
 
-Spartan Components let you stick to VanillaJS as much as possible.
+Spartan components let you stick to VanillaJS as much as possible.
 
 ## Components
 
@@ -38,4 +38,3 @@ That said, SpartanJS aims to support (for now):
 - IE8+
 
 The exact goals for Mobile device support are still undecided at this point but the goal is to provide reasonable support for IOS and Android users.
-
