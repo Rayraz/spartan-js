@@ -39,13 +39,13 @@ var Animate = (function(Type, Style, Event, Easing, window) {
 
   var Animation = function(element) {
     if(!Type.is('Element', element)) { return; }
-    if(!element.events || !(element.events instanceof Event)) {
-      element.events = new Event();
-    }
     if(element.animation && element.animation instanceof Animation) {
       return element.animation;
     }
     else if(this instanceof Animation) {
+      if(!element.events || !(element.events instanceof Event)) {
+        element.events = new Event();
+      }
       this.element        = element;
       this._vent          = element.events;
       this._tweens        = {};
@@ -77,7 +77,7 @@ var Animate = (function(Type, Style, Event, Easing, window) {
     // Finds placeholders in css property templates.
     _placeholderRegexp: /\{(\d+)\}/g,
     // properties that must have integer values
-    _intProp: /color/i,
+    _intProp: /color|zIndex/i,
 
     // Implementation > Animations
     // --------------------------------
