@@ -1,12 +1,25 @@
 # SpartanJS - 0.1.0
 
-SpartanJS is a collection of simple no-nonsense JavaScript components. 
+SpartanJS is a collection of simple no-nonsense JavaScript components.
 
 These components are designed to be compact and functional, without adding things you're not going to need.
 Each component focusses on doing one task and one task only without the unnecessary bulk from endless lists of convenience methods.
 
 Spartan Components let you stick to VanillaJS as much as possible.
- 
+
+## Components
+
+SpartanJS currently contains the following components
+
+ - __Type__, a Type-checking library.
+ - __Dom__, a QuerySelectAll wrapper.
+ - __Event__, a simple Event handler.
+ - __DomReady__, a custom dom ready event handler.
+ - __DomEvent__, an Event handler for DOM events, supports event delegation.
+ - __Style__, get and set css styles.
+ - __Animate__, tween between css styles or translate css styles over time, using WindowAnimationTiming (or a polyfill).
+ - __Easing__, custom easing functions for Animate.
+
 ## Stability
 
 SpartanJS is still in development and should be considered relatively unstable.
