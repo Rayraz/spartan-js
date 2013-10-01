@@ -26,6 +26,12 @@ var Type =(function() {
     isUndefined: function(obj) {
       return obj === void 0;
     },
+    isObject: function(obj) {
+      return obj && typeof obj === "object";
+    },
+    isWindow: function(obj) {
+      return this.isObject(obj) && "setInterval" in obj && obj.self === obj;
+    }
   };
 
   _tests.isArray = Array.isArray || function(obj) {
@@ -46,8 +52,8 @@ var Type =(function() {
 
   _tests.isEmpty = function(obj) {
     if(obj == null) { return true; }
-    if(_.isArray(obj) || _.isString(obj)) { return obj.length === 0; }
-    for(var key in obj) if(_.has(obj, key)) { return false; }
+    if(_tests.isArray(obj) || _tests.isString(obj)) { return obj.length === 0; }
+    for(var key in obj) if(obj.hasOwnProperty(key)) { return false; }
     return true;
   };
 
