@@ -30,63 +30,93 @@ var Event = (function(Type) {
     trigger: function(type, event /* polymorphic */) {
       var listeners = [], i, listener;
 
-      // listeners for event, listeners for wildcard
+      // Listeners for event, listeners for wildcard
       listeners = listeners.concat(this._listeners[type], this._listeners['*']);
 
-      // no listeners
+      // No listeners
       if(!listeners.length) { return; }
 
-      // trigger callbacks
+      // Trigger callbacks
       for(i = 0; i < listeners.length; i++) {
-        // allow interrupting the callback loop.
+        // Allow interrupting the callback loop.
         if(event && event.isImmediatePropagationStopped && event.isImmediatePropagationStopped()) { break; }
 
-        // dont interrupt the callback loop on errors
-        try { listeners[i].apply(undefined, slice.call(arguments, 1)); }
+        // Don't interrupt the callback loop on errors
+        try {
+          listener = listeners[i];
+          listener[0].apply(listener[1], slice.call(arguments, 1));
+        }
         catch(exception) { continue; }
       }
-
-      return this;
     },
-    on: function(type, listener) {
-      var listeners = this._listeners[type] || undefined;
+    on: function(types, listeners, context) {
+      var type, i, registered, listener;
+      types = Type.is('Array', types) ? types : types.split(/[ ,]+/);
 
-      // ensure type is registered
-      listeners = Type.is('Array', listeners) ? listeners : [];
-
-      // ignore duplicate listeners
-      if(indexOf.call(listeners, listener) >= 0) { return; }
-
-      // register new listener
-      listeners.push(listener);
-
-      // store result
-      this._listeners[type] = listeners;
-
-      return this;
-    },
-    off: function(type, listener) {
-      var listeners, index;
-
-      // No type defined: Remove listeners for all types
-      if(type === undefined) {
-        this._listeners = {};
+      // Split multiple events
+      if(types.length > 1) {
+        for(i = types.length; i--; this.on.call(this, types[i], listeners, context));
+        return;
       }
 
+      // Bind listeners
+      else {
+        type = types.pop();
+        // Prepare listeners
+        registered = this._listeners[type] || [];
+        listeners  = Type.is('Array', listeners) ? listeners : [listeners];
+
+        for(i in listeners) {
+          listener = listeners[i];
+          listener = Type.is('Array', listener) ? listener : [listener, context];
+          if(indexOf.call(registered, listener) < 0) {
+            registered.push(listener);
+          }
+        }
+      }
+
+      // Store result
+      this._listeners[type] = registered;
+    },
+    off: function(types, listeners, context) {
+      var type, i, registered, listener, index;
+
+      // No types defined: Remove listeners for all types
+      if(types === undefined) {
+        this._listeners = {};
+        return;
+      }
+
+      // Iterate over event types
+      types = Type.is('Array', types) ? types : types.split(/[ ,]+/);
+      if(types.length > 1) {
+        for(i = types.length; i--; this.off.call(this, types[i], listeners, context));
+        return;
+      }
       // No listeners defined: Remove all listeners for type
-      if(listener === undefined) {
+      else if(listener === undefined) {
         delete this._listeners[type];
       }
+      // Unbind listeners
+      else{
+        type       = types.pop();
+        registered = this._listeners[type];
 
-      // Remove specific listener
-      listeners = this._listeners[type];
-      index     = indexOf.call(listeners, listener);
-      if(index !== -1) {
-        listeners.splice(index, 1);
+        // No existing listeners, nothing to do
+        if(registered === undefined) { return; }
+
+        // Remove specific listeners
+        listeners  = Type.is('Array', listeners) ? listeners : [listeners];
+        for(i in listeners) {
+          listener = listeners[i];
+          listener = Type.is('Array', listener) ? listener : [context, listener];
+          index    = indexOf.call(registered, listener);
+          if(index !== -1) {
+            registered.splice(index, 1);
+          }
+        }
         this._listeners[type] = listeners;
       }
-
-      return this;
     },
     hasListeners: function(type) {
       var listeners, i, numListeners = 0;
@@ -101,7 +131,6 @@ var Event = (function(Type) {
           }
         }
       }
-
       return !!numListeners;
     }
   };

@@ -76,60 +76,94 @@ var DomEvent = (function(Type, Event, Dom) {
    */
   var _eventForwarder = function(event) {
     event = _fixEvent(event, this);
-    this.events.trigger(event.type, event, event.target);
+    this.events.trigger(event.type, event);
   };
 
   /**
    * API
    */
   return {
-    on: function(element, type, scope, listener) {
-      var handler, trigger = type, firstOfType;
-      if(arguments.length == 3) { listener = scope; scope = ''; }
-      if(arguments.length == 4) { trigger += ' ' + scope; }
+    on: function(element, types, scope, listeners, context) {
+      var i, trigger, type, handler, firstOfType;
+      types = Type.is('Array', types) ? types : types.split(/[ ,]+/);
 
-      // Make sure the element has an event handler
-      if(!element.events || !(element.events instanceof Event)) {
-        element.events = new Event();
+      // Split multiple events
+      if(types.length > 1) {
+        for(i = types.length; i--; this.on.call(this, element, types[i], scope, listeners, context));
+        return;
       }
-      handler     = element.events;
-      firstOfType = !handler.hasListeners(trigger);
 
-      // Bind listener to event handler
-      handler.on(trigger, listener);
+      // Bind listeners
+      else {
+        trigger = type = types.pop();
 
-      // Create/Get a callback that will trigger the event handler
-      handler[trigger] = (scope) ? _delegateForwarder(element, scope, trigger) : _eventForwarder;
-
-      // Let native eventListener forward the dom event to the targets'
-      // event handler.
-      if(firstOfType) {
-        if(element.addEventListener) {
-          element.addEventListener(type, handler[trigger], false);
+        if(!Type.is('String', scope)) {
+          context   = listeners;
+          listeners = scope;
+          scope     = undefined;
         }
-        else {
-          element.attachEvent(type, handler[trigger]);
+        else { trigger += ' ' + scope; }
+
+        // Make sure the element has an event handler
+        if(!element.events || !(element.events instanceof Event)) {
+          element.events = new Event();
+        }
+        handler     = element.events;
+        firstOfType = !handler.hasListeners(trigger);
+
+        // Bind listeners to event handler
+        handler.on(trigger, listeners, context);
+
+        // Create/Get a callback that will trigger the event handler
+        handler[trigger] = (scope) ? _delegateForwarder(element, scope, trigger) : _eventForwarder;
+
+        // Let native eventListener forward the dom event to the targets'
+        // event handler.
+        if(firstOfType) {
+          if(element.addEventListener) {
+            element.addEventListener(type, handler[trigger], false);
+          }
+          else {
+            element.attachEvent(type, handler[trigger]);
+          }
         }
       }
     },
-    off: function(element, type, scope, listener) {
-      var handler = element.events, trigger = type;
-      if(arguments.length == 3) { listener = scope; scope = ''; }
-      if(arguments.length == 4) { trigger += ' ' + scope; }
+    off: function(element, types, scope, listeners, context) {
+      var i, trigger, type, handler = element.events;
+      types = Type.is('Array', types) ? types : types.split(/[ ,]+/);
 
-      // Unbind with Event
-      if(handler) { handler.off(trigger, listener); }
+      // Split multiple events
+      if(types.length > 1) {
+        for(i = types.length; i--; this.off.call(this, element, types[i], scope, listeners, context));
+        return;
+      }
 
-      // If event has no more listeners, remove the Event.
-      if(!handler.hasListeners(trigger)) {
-        if(element.removeEventListener) {
-          element.removeEventListener(type, handler[trigger], false);
+      // Bind listeners
+      else {
+        trigger = type = types.pop();
+
+        if(!Type.is('String', scope)) {
+          context   = listeners;
+          listeners = scope;
+          scope     = undefined;
         }
-        else {
-          element.detachEvent(type, handler[trigger]);
+        else { trigger += ' ' + scope; }
+
+        // Unbind with Event
+        if(handler) { handler.off(trigger, listeners); }
+
+        // If event has no more listeners, remove the Event.
+        if(!handler.hasListeners(trigger)) {
+          if(element.removeEventListener) {
+            element.removeEventListener(type, handler[trigger], false);
+          }
+          else {
+            element.detachEvent(type, handler[trigger]);
+          }
+          // the forwarder is of no use now either
+          delete handler[trigger];
         }
-        // the forwarder is of no use now either
-        delete handler[trigger];
       }
     }
   };
