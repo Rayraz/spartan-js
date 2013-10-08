@@ -3,35 +3,26 @@ var Dom = (function(Type, document) {
   "use strict";
 
   var Dom = function(selector, scope) {
-    if(this instanceof Dom) {
-      return this._find(selector, scope);
-    }
-    else {
-      return new Dom(selector, scope);
-    }
-  };
-  Dom.prototype = {
-    // Implementation
-    // ----------------
-
+    var _tempNid, _find, _onlyElements, _qsa;
     // temporary nid, used for scoping
-    _tempNid: 'Dom'+ -(new Date()),
+    _tempNid = 'Dom'+ -(new Date()),
     // Run selector for each element in scope
-    _find: function(selector, scope) {
+    _find = function(selector, scope) {
       if(!Type.is('String', selector)) { return this; }
       var i, nodeList, j, results = [];
       scope = Type.is('Array', scope) ? scope : [scope];
-      scope = this._onlyElements(scope);
+      scope = _onlyElements(scope);
+      scope = scope.length ? scope : [undefined];
 
       // search
       for(i = 0; i < scope.length; i++) {
-        nodeList = this._qsa(selector, scope[i]);
+        nodeList = _qsa(selector, scope[i]);
         for(j = nodeList.length; j--; results.unshift(nodeList[j]));
       }
       return results;
     },
     // Removes any non-elements from the set
-    _onlyElements: function(set) {
+    _onlyElements = function(set) {
       var i, elements = [];
       // ensure array
       set = Type.is('Array', set) ? set : [set];
@@ -44,14 +35,14 @@ var Dom = (function(Type, document) {
       return elements;
     },
     // Find elements within optional scope using querySelectorAll
-    _qsa: function(selector, scope) {
+    _qsa = function(selector, scope) {
       var _scopeNid, results;
       if(scope) {
         _scopeNid = scope.getAttribute("id");
         // ensure scope element has an id.
-        if(!_scopeNid) { scope.setAttribute("id", this._tempNid); }
+        if(!_scopeNid) { scope.setAttribute("id", _tempNid); }
         // create scoped selector
-        selector = '#' + (_scopeNid ? _scopeNid : this._tempNid) + ' ' + selector;
+        selector = '#' + (_scopeNid ? _scopeNid : _tempNid) + ' ' + selector;
       }
 
       // execute query
@@ -62,6 +53,8 @@ var Dom = (function(Type, document) {
 
       return results;
     }
+    // Do the stuff!
+    return _find(selector, scope);
   };
 
   return Dom;
