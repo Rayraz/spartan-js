@@ -4,7 +4,7 @@ var Dom = (function(Type, document) {
 
   var Dom = function(selector, scope) {
     if(this instanceof Dom) {
-      return this.find(selector, scope);
+      return this._find(selector, scope);
     }
     else {
       return new Dom(selector, scope);
