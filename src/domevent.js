@@ -58,7 +58,7 @@ var DomEvent = (function(Type, Event, Dom) {
   var _delegateForwarder = function(parent, selector, trigger) {
     // Conditionally forward the event.
     var conditional = function(parent, selector, trigger, event) {
-      var nodeList = new Dom(selector, parent).getAll();
+      var nodeList = new Dom(selector, parent);
       if(Array.prototype.indexOf.call(nodeList, event.target) > -1) {
         event = _fixEvent(event, this);
         this.events.trigger(trigger, event, event.target);

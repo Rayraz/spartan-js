@@ -4,8 +4,7 @@ var Dom = (function(Type, document) {
 
   var Dom = function(selector, scope) {
     if(this instanceof Dom) {
-      this.set(scope);
-      this.find(selector);
+      return this.find(selector, scope);
     }
     else {
       return new Dom(selector, scope);
@@ -17,6 +16,20 @@ var Dom = (function(Type, document) {
 
     // temporary nid, used for scoping
     _tempNid: 'Dom'+ -(new Date()),
+    // Run selector for each element in scope
+    _find: function(selector, scope) {
+      if(!Type.is('String', selector)) { return this; }
+      var i, nodeList, j, results = [];
+      scope = Type.is('Array', scope) ? scope : [scope];
+      scope = this._onlyElements(scope);
+
+      // search
+      for(i = 0; i < scope.length; i++) {
+        nodeList = this._qsa(selector, scope[i]);
+        for(j = nodeList.length; j--; results.unshift(nodeList[j]));
+      }
+      return results;
+    },
     // Removes any non-elements from the set
     _onlyElements: function(set) {
       var i, elements = [];
@@ -48,36 +61,6 @@ var Dom = (function(Type, document) {
       if(scope && !_scopeNid) { scope.removeAttribute("id"); }
 
       return results;
-    },
-
-    // API
-    // ----------------
-
-    find: function(selector) {
-      if(!Type.is('String', selector)) { return this; }
-      var scope, i, nodeList, j, results = [];
-      scope = this.elements.length ? this.elements : [undefined];
-
-      // search
-      for(i = 0; i < scope.length; i++) {
-        nodeList = this._qsa(selector, scope[i]);
-        for(j = nodeList.length; j--; results.unshift(nodeList[j]));
-      }
-
-      // store results
-      return this.set(results);
-    },
-    set: function(elements) {
-      this.elements = this._onlyElements(elements);
-      this.length   = this.elements.length;
-      return this;
-    },
-    get: function(n) {
-      n = n || 0;
-      return this.elements[n];
-    },
-    getAll: function() {
-      return this.elements;
     }
   };
 
