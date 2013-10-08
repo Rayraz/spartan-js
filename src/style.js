@@ -43,8 +43,9 @@ var Style = (function(Type, document) {
   /**
    * Convert non-pixel values to pixels values (IE<=8) element.currentStyle
    */
-  var _pixelPropertyRegexp = /^(top|right|bottom|left|fontsize|lineheight)$/i;
+  var _pixelPropertyRegexp = /(top|right|bottom|left|^(fontSize|lineHeight|width|height)$)/i;
   var _isPixelValueRegexp  = /^((-\d+\.\d+|\d+\.\d+|-\.\d+|\.\d+|-\d+|\d+)(px))?$/i;
+  var _hasUnitRegexp       = /^auto$|[a-zA-Z%]$/i;
   var _getPixelValue       = function(element, value) {
     if(_isPixelValueRegexp.test(value)) { return value; }
     var style, runtimeStyle, hasRuntimeStyle = !!element.runtimeStyle;
@@ -170,6 +171,9 @@ var Style = (function(Type, document) {
    * Default style setter
    */
   var _setProperty = function(node, property, value) {
+    if(_pixelPropertyRegexp.test(property)) {
+      value = _hasUnitRegexp.test(value) ? value : value + 'px';
+    }
     node.style[_prefixMap[property]] = value;
   };
 
@@ -192,7 +196,7 @@ var Style = (function(Type, document) {
                               : _getProperty(node, properties[i]);
       }
 
-      return styles;
+      return (i > 1) ? styles : styles[properties[--i]];
     },
     set: function(node, styles) {
       if(!Type.is('Element', node)) { return {}; }
