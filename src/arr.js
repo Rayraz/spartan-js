@@ -21,7 +21,7 @@ var Arr = (function() {
       for(i = 0; i < arr.length; i++) {
         result.push((arr[i] === remove) ? add : arr[i]);
       }
-      return (unique) ? this.unique(arr) : arr;
+      return (unique) ? this.unique(result) : result;
     },
     remove: function(arr, value) {
       var result = [], i;
