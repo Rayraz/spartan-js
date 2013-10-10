@@ -121,7 +121,7 @@ var Style = (function(Type, document) {
     set: {
       "float": function(node, value) {
         var property = nonstandard.ieFloat ? "cssFloat" : "styleFloat";
-        return _setStyle(node, property, value);
+        return _setProperty(node, property, value);
       },
       opacity: function(node, value) {
         var filter;
@@ -142,7 +142,7 @@ var Style = (function(Type, document) {
           return;
         }
         else {
-          return _setStyle(node, "opacity", value);
+          return _setProperty(node, "opacity", value);
         }
       }
     }
@@ -187,8 +187,8 @@ var Style = (function(Type, document) {
     },
     get: function(node, properties) {
       if(!Type.is('Element', node)) { return {}; }
-      var i, styles = {};
-      properties = Type.is('Array', properties) ? properties : [properties];
+      var i, styles = {}, asArray = Type.is('Array', properties);
+      properties = asArray ? properties : [properties];
 
       for(i = 0; i < properties.length; i++) {
         styles[properties[i]] = _customHandlers.get[properties[i]]
@@ -196,7 +196,7 @@ var Style = (function(Type, document) {
                               : _getProperty(node, properties[i]);
       }
 
-      return (i > 1) ? styles : styles[properties[--i]];
+      return (asArray) ? styles : styles[properties[--i]];
     },
     set: function(node, styles) {
       if(!Type.is('Element', node)) { return {}; }
