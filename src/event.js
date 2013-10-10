@@ -42,11 +42,9 @@ var Event = (function(Type) {
         if(event && event.isImmediatePropagationStopped && event.isImmediatePropagationStopped()) { break; }
 
         // Don't interrupt the callback loop on errors
-        try {
-          listener = listeners[i];
+        if(listener = listeners[i]) {
           listener[0].apply(listener[1], slice.call(arguments, 1));
         }
-        catch(exception) { continue; }
       }
     },
     on: function(types, listeners, context) {
