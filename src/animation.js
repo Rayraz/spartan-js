@@ -1,7 +1,7 @@
 /**
  * TODO: inertia
  */
-var Animate = (function(Type, Style, Event, Easing, window) {
+var Animation = (function(Type, Style, Event, Easing, window) {
 
   "use strict";
 
@@ -39,15 +39,11 @@ var Animate = (function(Type, Style, Event, Easing, window) {
 
   var Animation = function(element) {
     if(!Type.is('Element', element)) { return; }
-    if(element.animation && element.animation instanceof Animation) {
-      return element.animation;
-    }
-    else if(this instanceof Animation) {
-      if(!element.events || !(element.events instanceof Event)) {
-        element.events = new Event();
+    if(this instanceof Animation) {
+      if(!this.events || !(this.events instanceof Event)) {
+        this.events = new Event();
       }
       this.element        = element;
-      this._vent          = element.events;
       this._tweens        = {};
       this._newAnimations = [];
       this._frame         = undefined;
@@ -91,7 +87,7 @@ var Animate = (function(Type, Style, Event, Easing, window) {
         if(animation) {
           isNew = this._hasTweens();
           this._mergeTweens(animation);
-          this._vent.trigger('animation:' + (isNew ? 'new' : 'merge'), animation);
+          this.events.trigger('animation:' + (isNew ? 'new' : 'merge'), animation);
         }
       }
     },
@@ -169,7 +165,7 @@ var Animate = (function(Type, Style, Event, Easing, window) {
           tween.inertia = this._tweens[property].inertia;
         }
         this._tweens[property] = tween;
-        this._vent.trigger('animation:tween:' + action, tween);
+        this.events.trigger('tween:' + action, tween);
       }
     },
 
@@ -212,7 +208,7 @@ var Animate = (function(Type, Style, Event, Easing, window) {
       }
       else {
         delete this._frame;
-        this._vent.trigger('animation:done');
+        this.events.trigger('animation:done');
       }
     },
     _render: function() {
@@ -250,7 +246,7 @@ var Animate = (function(Type, Style, Event, Easing, window) {
           remainingTweens[property] = tween;
         }
         else {
-          this._vent.trigger('animation:tween:done', tween);
+          this.events.trigger('tween:done', tween);
         }
       }
 
@@ -283,19 +279,55 @@ var Animate = (function(Type, Style, Event, Easing, window) {
         });
       }
     },
-    stop: function(finish) {
-      if(finish) {
-        for(var property in this._tweens) {
+    stop: function(properties, finish) {
+      var property, i, animation, tween;
+      // Stop all properties
+      if(Type.is('Boolean', properties)) {
+        finish     = properties;
+        properties = [];
+        for(property in this._tweens) {
+          properties.push(property);
+        }
+        for(property in this._newAnimations) {
+          properties.push(property);
+        }
+        this.stop(properties, finish);
+        return;
+      }
+
+      // Interrupt animation loop
+      cancelAnimationFrame(this._frame);
+
+      // Create [property,finish] tuples.
+      for(i in properties) {
+        property      = properties[i];
+        properties[i] = Type.is('Array', property) ? property: [property, finish];
+      }
+
+      // stop tweens
+      for(i in properties) {
+        property = properties[i][0];
+        finish   = properties[i][1];
+        tween    = this._tweens[property];
+        // fastforward tween
+        if(finish && tween) {
           this._tweens[property].duration = 0;
           this._tweens[property].decay    = 0;
         }
+        // stop tween in mid-animation
+        else if(tween) {
+          delete this._tweens[property];
+          this.event.trigger('tween:interrupted', tween);
+        }
+        // remove queued tween
+        tween = this._newAnimations[property];
+        delete this._newAnimations[property];
+        this.event.trigger('tween:cancelled', tween);
       }
-      else {
-        this._tweens = {};
-        cancelAnimationFrame(this._frame);
-      }
-    },
 
+      // Continue animation loop
+      this._tick();
+    }
   };
 
   return Animation;
