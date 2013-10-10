@@ -90,7 +90,7 @@ var DomEvent = (function(Type, Event, Dom) {
   return {
     on: function(element, types, scope, listeners, context) {
       var i, trigger, type, handler, firstOfType;
-      if(!Type.is('Element', element)) { return; }
+      if(!Type.is(['Element', 'Window'], element)) { return; }
       types = Type.is('Array', types) ? types : types.split(/[ ,]+/);
 
       // Split multiple events
