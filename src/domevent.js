@@ -34,14 +34,17 @@ var DomEvent = (function(Type, Event, Dom) {
         e = this.originalEvent;
         if(e) {
           if(e.stopPropagation) { e.stopPropagation(); }
-          else { e.cancelBubble = false; }
+          e.cancelBubble = true; // Chrome bug
         }
       };
       this.stopImmediatePropagation = function() {
         this.isImmediatePropagationStopped = _returnTrue;
         this.stopPropagation();
       };
-      this.target = this.target || this.srcElement;
+      this.target = this.target || this.srcElement; // IE compat issue
+      if(this.target.nodeType == 3) {
+        this.target = this.target.parentNode; // Safari bug
+      }
     };
     EnhancedEvent.prototype = event;
 
@@ -56,18 +59,19 @@ var DomEvent = (function(Type, Event, Dom) {
    * selector.
    */
   var _delegateForwarder = function(parent, selector, trigger) {
-    // Conditionally forward the event.
-    var conditional = function(parent, selector, trigger, event) {
-      var nodeList = new Dom(selector, parent);
-      if(Array.prototype.indexOf.call(nodeList, event.target) > -1) {
-        event = _fixEvent(event, this);
-        this.events.trigger(trigger, event, event.target);
-      }
+    var isDelegate = function(candidate, selector, parent) {
+      var delegates = Dom(selector, parent);
+      return (Array.prototype.indexOf.call(delegates, event.target) > -1);
     };
 
     // return partially applied function
     return function(event) {
-      return conditional.call(this, parent, selector, trigger, event);
+      event      = event || window.event;
+      event      = _fixEvent(event, this);
+      if(isDelegate(event.target, selector, parent)
+        || isDelegate(event.target, selector+' *', parent)) {
+        this.events.trigger(trigger, event);
+      }
     };
   };
 
@@ -75,6 +79,7 @@ var DomEvent = (function(Type, Event, Dom) {
    * Forwards the event to event.targets' events handler.
    */
   var _eventForwarder = function(event) {
+    event = event || window.event;
     event = _fixEvent(event, this);
     this.events.trigger(event.type, event);
   };
@@ -85,6 +90,7 @@ var DomEvent = (function(Type, Event, Dom) {
   return {
     on: function(element, types, scope, listeners, context) {
       var i, trigger, type, handler, firstOfType;
+      if(!Type.is('Element', element)) { return; }
       types = Type.is('Array', types) ? types : types.split(/[ ,]+/);
 
       // Split multiple events
@@ -102,7 +108,7 @@ var DomEvent = (function(Type, Event, Dom) {
           listeners = scope;
           scope     = undefined;
         }
-        else { trigger += ' ' + scope; }
+        else { trigger += '(' + scope + ')'; }
 
         // Make sure the element has an event handler
         if(!element.events || !(element.events instanceof Event)) {
@@ -131,6 +137,7 @@ var DomEvent = (function(Type, Event, Dom) {
     },
     off: function(element, types, scope, listeners, context) {
       var i, trigger, type, handler = element.events;
+      if(!Type.is('Element', element)) { return; }
       types = Type.is('Array', types) ? types : types.split(/[ ,]+/);
 
       // Split multiple events
@@ -148,7 +155,7 @@ var DomEvent = (function(Type, Event, Dom) {
           listeners = scope;
           scope     = undefined;
         }
-        else { trigger += ' ' + scope; }
+        else { trigger += '(' + scope + ')'; }
 
         // Unbind with Event
         if(handler) { handler.off(trigger, listeners); }
