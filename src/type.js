@@ -31,6 +31,9 @@ var Type =(function() {
     },
     isWindow: function(obj) {
       return this.isObject(obj) && "setInterval" in obj && obj.self === obj;
+    },
+    wildcard: function(obj, type) {
+      return Object.prototype.toString.call(obj) == '[object ' + type + ']';
     }
   };
 
@@ -59,13 +62,15 @@ var Type =(function() {
 
   // API
   return {
-    is: function(type, value) {
-      if(_tests.hasOwnProperty('is' + type)) {
-        return _tests['is' + type](value);
+    is: function(types, value) {
+      var i, type, test;
+      types = _tests.isArray(types) ? types : [types];
+      for(i in types) {
+        type = types[i];
+        test = _tests.hasOwnProperty('is' + type) ? _tests['is' + type] : _tests.wildcard;
+        if(test.call(_tests, value, type)) { return true; }
       }
-      else {
-        return Object.prototype.toString.call(value) == '[object ' + type + ']';
-      }
+      return false;
     }
   };
 
