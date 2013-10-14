@@ -6,27 +6,30 @@ var EventProps = (function(Type) {
 
   var _customHandlers = {
     pageX: function(event, pointers) {
+      return this._pointerCoordinates(event, pointers, 'X');
+    },
+    pageY: function(event, pointers) {
+      return this._pointerCoordinates(event, pointers, 'Y');
+    },
+    _pointerCoordinates: function(event, pointers, axis) {
       var i, properties = [];
       pointers = pointers || 0;
       if(Type.is('Array', pointers)) {
         for(i in pointers) {
-          properties.push(this._pointerCoordinate(event, pointers[i], 'X'));
+          properties.push(this._pointerCoordinate(event, pointers[i], axis));
         }
         return properties;
       }
       else {
-        return this._pointerCoordinate(event, pointers, 'X');
+        return this._pointerCoordinate(event, pointers, axis);
       }
-    },
-    pageY: function() {
-      return this._pointerCoordinate(event, pointers, 'Y');
     },
     _pointerCoordinate: function(event, pointer, axis) {
       var eventType = event.eventName || event.type;
-      if(eventType == 'touchstart') {
-        return event.touches[touchNr]['page' + axis];
+      if(eventType.match(/^touch/)) {
+        return event.touches[pointer]['page' + axis];
       }
-      else if(eventType == 'mousedown') {
+      else if(eventType.match(/^mouse/)) {
         if(event.pageX || event.pageY) {
           return event['page' + axis];
         }
