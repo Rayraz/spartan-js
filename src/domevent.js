@@ -19,21 +19,19 @@ var DomEvent = (function(Type, Event, Dom) {
       this.isPropagationStopped          = _returnFalse;
       this.isImmediatePropagationStopped = _returnFalse;
       this.preventDefault = function() {
+        var event = this.originalEvent;
         this.isDefaultPrevented = _returnTrue;
-
-        e = this.originalEvent;
-        if(e) {
-          if(e.preventDefault) { e.preventDefault(); }
-          else { e.returnValue = false; }
+        if(event) {
+          if(event.preventDefault) { event.preventDefault(); }
+          else { event.returnValue = false; }
         }
       };
       this.stopPropagation = function() {
+        var event = this.originalEvent;
         this.isPropagationStopped = _returnTrue;
-
-        e = this.originalEvent;
-        if(e) {
-          if(e.stopPropagation) { e.stopPropagation(); }
-          e.cancelBubble = true; // Chrome bug
+        if(event) {
+          if(event.stopPropagation) { event.stopPropagation(); }
+          event.cancelBubble = true; // Chrome bug
         }
       };
       this.stopImmediatePropagation = function() {
@@ -224,7 +222,7 @@ var DomEvent = (function(Type, Event, Dom) {
       }
     },
     off: function(element, types, scope, listeners, context) {
-      var i, trigger, type, handler = element.events;
+      var i, trigger, type, handler = element.events, eventSupported;
       if(element === document) { element = document.documentElement; }
       if(!Type.is(['Element', 'Window'], element)) { return; }
       types = Type.is('Array', types) ? types : types.split(/[ ,]+/);
@@ -247,10 +245,10 @@ var DomEvent = (function(Type, Event, Dom) {
         else { trigger += '(' + scope + ')'; }
 
         // Unbind with Event
-        if(handler) { handler.off(trigger, listeners); }
+        if(handler) { handler.off(trigger, listeners, context); }
 
         // If event has no more listeners, remove the Event.
-        if(!handler.hasListeners(trigger)) {
+        if(handler && !handler.hasListeners(trigger)) {
           eventSupported = _isEventSupported(type);
           if(element.removeEventListener) {
             // Native events

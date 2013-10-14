@@ -92,7 +92,7 @@ var Event = (function(Type) {
         return;
       }
       // No listeners defined: Remove all listeners for type
-      else if(listener === undefined) {
+      else if(listeners === undefined) {
         delete this._listeners[type];
       }
       // Unbind listeners
@@ -107,13 +107,14 @@ var Event = (function(Type) {
         listeners  = Type.is('Array', listeners) ? listeners : [listeners];
         for(i in listeners) {
           listener = listeners[i];
-          listener = Type.is('Array', listener) ? listener : [context, listener];
-          index    = indexOf.call(registered, listener);
-          if(index !== -1) {
-            registered.splice(index, 1);
+          listener = Type.is('Array', listener) ? listener : [listener, context];
+          for(index in registered) {
+            if(registered[index][0] == listener[0] && registered[index][1] == listener[1]) {
+              registered.splice(index, 1);
+            }
           }
         }
-        this._listeners[type] = listeners;
+        this._listeners[type] = registered;
       }
     },
     hasListeners: function(type) {
