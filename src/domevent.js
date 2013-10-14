@@ -2,9 +2,8 @@ var DomEvent = (function(Type, Event, Dom) {
 
   "use strict";
 
-  /**
-   * Fix inconsistent/incomplete event implementations
-   */
+  // Event Object Compatibility
+  // --------------------------
   var _fixEvent = function(event) {
 
     var _returnTrue = function() {
@@ -51,16 +50,84 @@ var DomEvent = (function(Type, Event, Dom) {
     return new EnhancedEvent();
   };
 
-  /**
-   * Returns a partially applied function that will:
-   *
-   * Forward the event to event.targets' events handler on the condition that
-   * event.target is both a child of the parent node ánd matches the provided
-   * selector.
-   */
-  var _delegateForwarder = function(parent, selector, trigger) {
-    var isDelegate = function(candidate, selector, parent) {
-      var delegates = Dom(selector, parent);
+  // Event Support
+  // -------------
+  var _eventTags = {
+    'select':'input','change':'input',
+    'submit':'form','reset':'form',
+    'error':'img','load':'img','abort':'img'
+  };
+  var _eventSupportCache = {};
+  var _isEventSupported = function(type) {
+    var element, isSupported;
+    if(Type.is('Undefined', _eventSupportCache[type])) {
+      type        = 'on' + type;
+      isSupported = (type in window);
+      if(!isSupported) {
+        element     = document.createElement(_eventTags[type] || 'div');
+        isSupported = (type in element);
+      }
+      if(!isSupported) {
+        element.setAttribute(type, 'return;');
+        isSupported = typeof element[type] == 'function';
+      }
+      element = null;
+      _eventSupportCache[type] = isSupported;
+    }
+    return _eventSupportCache[type];
+  };
+
+  // Custom Events
+  // -------------
+  var _getEventTarget = function(element) {
+    if(element === document && document.createEvent && !element.dispatchEvent) {
+      return document.documentElement;
+    }
+    else {
+      return (element.nodeType === 3 || element.nodeType === 8) ? null : element;
+    }
+  };
+  var _triggerEventDOM = function(element, type, properties, bubble) {
+    var event, property;
+    event = document.createEvent('HTMLEvents');
+    event.initEvent('dataavailable', bubble, true);
+
+    for(property in properties) {
+      event[property] = properties[property];
+    }
+    event.eventName = type;
+
+    element.dispatchEvent(event);
+    return event;
+  };
+  var _triggerEventIE = function(element, type, properties, bubble) {
+    var event, property;
+    event = document.createEventObject();
+    event.eventType = bubble ? 'ondataavailable' : 'onlosecapture';
+
+    for(property in properties) {
+      event[property] = properties[property];
+    }
+    event.eventName = type;
+
+    element.fireEvent(event.eventType, event);
+    return event;
+  };
+  var _triggerEvent = document.createEvent ? _triggerEventDOM : _triggerEventIE;
+
+  // Event Forwarders
+  // ----------------
+  // Forwards DOM Events trough Event component that lists the actual
+  // user-assigned callbacks.
+
+  // Returns a partially applied function that will forward a delegated event
+  // provided the event's target passes the following criteria:
+  // - event.target is a child of the delegator node
+  // - event.target matches the provided selector ór is a child of a node
+  //   matching the selector.
+  var _delegateForwarder = function(delegator, selector, trigger) {
+    var isDelegate = function(candidate, selector, delegator) {
+      var delegates = Dom(selector, delegator);
       return (Array.prototype.indexOf.call(delegates, event.target) > -1);
     };
 
@@ -68,28 +135,37 @@ var DomEvent = (function(Type, Event, Dom) {
     return function(event) {
       event      = event || window.event;
       event      = _fixEvent(event, this);
-      if(isDelegate(event.target, selector, parent)
-        || isDelegate(event.target, selector+' *', parent)) {
-        this.events.trigger(trigger, event);
+      if(isDelegate(event.target, selector, delegator)
+        || isDelegate(event.target, selector + ' *', delegator)) {
+        this.events.trigger((event.eventName || event.type) + '(' + selector + ')', event);
       }
     };
   };
 
-  /**
-   * Forwards the event to event.targets' events handler.
-   */
+  // Forwards the event to event.targets' events handler.
   var _eventForwarder = function(event) {
     event = event || window.event;
     event = _fixEvent(event, this);
-    this.events.trigger(event.type, event);
+    this.events.trigger((event.eventName || event.type), event);
   };
 
-  /**
-   * API
-   */
+  // API
+  // ---
   return {
+    isSupported: function(type) {
+      return _isEventSupported(type);
+    },
+    trigger: function(element, type, properties, bubble) {
+      element    = _getEventTarget(element);
+      properties = properties || {};
+      bubble     = (bubble === undefined) ? true : bubble;
+      if(element) {
+        _triggerEvent(element, type, properties, bubble);
+      }
+    },
     on: function(element, types, scope, listeners, context) {
-      var i, trigger, type, handler, firstOfType;
+      var i, trigger, type, handler, firstOfType, eventSupported;
+      if(element === document) { element = document.documentElement; }
       if(!Type.is(['Element', 'Window'], element)) { return; }
       types = Type.is('Array', types) ? types : types.split(/[ ,]+/);
 
@@ -121,23 +197,36 @@ var DomEvent = (function(Type, Event, Dom) {
         handler.on(trigger, listeners, context);
 
         // Create/Get a callback that will trigger the event handler
-        handler[trigger] = (scope) ? _delegateForwarder(element, scope, trigger) : _eventForwarder;
+        handler[trigger] = (scope) ? _delegateForwarder(element, scope) : _eventForwarder;
 
         // Let native eventListener forward the dom event to the targets'
-        // event handler.
+        // Event handler.
         if(firstOfType) {
+          eventSupported = _isEventSupported(type);
           if(element.addEventListener) {
-            element.addEventListener(type, handler[trigger], false);
+            // Native events
+            if(eventSupported) {
+              element.addEventListener(type, handler[trigger], false);
+            }
+            // Custom events
+            element.addEventListener('dataavailable', handler[trigger], false);
           }
           else {
-            element.attachEvent(type, handler[trigger]);
+            // Native events
+            if(eventSupported) {
+              element.attachEvent('on' + type, handler[trigger]);
+            }
+            // Custom events
+            element.attachEvent('ondataavailable', handler[trigger]); // bubbling events
+            element.attachEvent('onlosecapture', handler[trigger]); // non-bubbling events
           }
         }
       }
     },
     off: function(element, types, scope, listeners, context) {
       var i, trigger, type, handler = element.events;
-      if(!Type.is('Element', element)) { return; }
+      if(element === document) { element = document.documentElement; }
+      if(!Type.is(['Element', 'Window'], element)) { return; }
       types = Type.is('Array', types) ? types : types.split(/[ ,]+/);
 
       // Split multiple events
@@ -162,11 +251,23 @@ var DomEvent = (function(Type, Event, Dom) {
 
         // If event has no more listeners, remove the Event.
         if(!handler.hasListeners(trigger)) {
+          eventSupported = _isEventSupported(type);
           if(element.removeEventListener) {
+            // Native events
+            if(eventSupported) {
+              element.removeEventListener(type, handler[trigger], false);
+            }
+            // Custom events
             element.removeEventListener(type, handler[trigger], false);
           }
           else {
-            element.detachEvent(type, handler[trigger]);
+            // Native events
+            if(eventSupported) {
+              element.detachEvent('on' + type, handler[trigger]);
+            }
+            // Custom events
+            element.detachEvent('ondataavailable', handler[trigger]);
+            element.detachEvent('onlosecapture', handler[trigger]);
           }
           // the forwarder is of no use now either
           delete handler[trigger];
