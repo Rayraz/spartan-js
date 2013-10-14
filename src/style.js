@@ -46,6 +46,7 @@ var Style = (function(Type, document) {
   var _pixelPropertyRegexp = /(top|right|bottom|left|^(fontSize|lineHeight|width|height)$)/i;
   var _isPixelValueRegexp  = /^((-\d+\.\d+|\d+\.\d+|-\.\d+|\.\d+|-\d+|\d+)(px))?$/i;
   var _hasUnitRegexp       = /^auto$|[a-zA-Z%]$/i;
+  var _nonDigitRegexp      = /[^-\d\.]/g;
   var _getPixelValue       = function(element, value) {
     if(_isPixelValueRegexp.test(value)) { return value; }
     var style, runtimeStyle, hasRuntimeStyle = !!element.runtimeStyle;
@@ -185,16 +186,19 @@ var Style = (function(Type, document) {
       if(Type.is('Function', getter)) { _customHandlers.get[property] = getter; }
       if(Type.is('Function', setter)) { _customHandlers.set[property] = setter; }
     },
-    get: function(node, properties) {
+    get: function(node, properties, unitless) {
       if(node === document) { node = document.documentElement; }
       if(!Type.is('Element', node)) { return {}; }
-      var i, styles = {}, asArray = Type.is('Array', properties);
+      var i, styles = {}, style, asArray = Type.is('Array', properties);
       properties = asArray ? properties : [properties];
 
       for(i = 0; i < properties.length; i++) {
-        styles[properties[i]] = _customHandlers.get[properties[i]]
-                              ? _customHandlers.get[properties[i]](node)
-                              : _getProperty(node, properties[i]);
+        style = _customHandlers.get[properties[i]]
+              ? _customHandlers.get[properties[i]](node)
+              : _getProperty(node, properties[i]);
+        styles[properties[i]] = (unitless)
+                              ? parseFloat(style.replace(_nonDigitRegexp))
+                              : style;
       }
 
       return (asArray) ? styles : styles[properties[--i]];
@@ -203,7 +207,6 @@ var Style = (function(Type, document) {
       if(node === document) { node = document.documentElement; }
       if(!Type.is('Element', node)) { return {}; }
       var property, value;
-
       for(property in styles) {
         if(styles.hasOwnProperty(property)) {
           value = styles[property];
