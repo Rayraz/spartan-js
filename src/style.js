@@ -186,6 +186,7 @@ var Style = (function(Type, document) {
       if(Type.is('Function', setter)) { _customHandlers.set[property] = setter; }
     },
     get: function(node, properties) {
+      if(node === document) { node = document.documentElement; }
       if(!Type.is('Element', node)) { return {}; }
       var i, styles = {}, asArray = Type.is('Array', properties);
       properties = asArray ? properties : [properties];
@@ -199,6 +200,7 @@ var Style = (function(Type, document) {
       return (asArray) ? styles : styles[properties[--i]];
     },
     set: function(node, styles) {
+      if(node === document) { node = document.documentElement; }
       if(!Type.is('Element', node)) { return {}; }
       var property, value;
 
