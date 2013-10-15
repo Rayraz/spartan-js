@@ -4,19 +4,6 @@ var Event = (function(Type) {
 
   var slice = Array.prototype.slice;
 
-  /**
-   * Implementation of Array.indexOf which sadly is not available in IE<=8
-   */
-  var indexOf = Array.prototype.indexOf || function(item) {
-    var i, len = this.length;
-    for(i = 0; i < len; i += 1) {
-      if(this[i] === item) {
-        return i;
-      }
-    }
-    return -1;
-  };
-
   // Super Simple Event Handling
   // ---------------------------
   var Event = function() {
@@ -48,7 +35,7 @@ var Event = (function(Type) {
       }
     },
     on: function(types, listeners, context) {
-      var type, i, registered, listener;
+      var type, i, j, registered, match, listener;
       types = Type.is('Array', types) ? types : types.split(/[ ,]+/);
 
       // Split multiple events
@@ -65,9 +52,13 @@ var Event = (function(Type) {
         listeners  = Type.is('Array', listeners) ? listeners : [listeners];
 
         for(i in listeners) {
+          match    = false;
           listener = listeners[i];
           listener = Type.is('Array', listener) ? listener : [listener, context];
-          if(indexOf.call(registered, listener) < 0) {
+          for(j in registered) {
+            match = registered[j] === listener;
+          }
+          if(!match) {
             registered.push(listener);
           }
         }

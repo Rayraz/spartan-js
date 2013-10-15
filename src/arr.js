@@ -4,9 +4,13 @@ var Arr = (function() {
 
   return {
     unique: function(arr) {
-      var result = [], i;
+      var result = [], i, j, match;
       for(i = 0; i < arr.length; i++) {
-        if(result.indexOf(arr[i]) === -1) {
+        match = false;
+        for(j in result) {
+          match = arr[i] === result[j];
+        }
+        if(!match) {
           result.push(arr[i]);
         }
       }

@@ -125,8 +125,11 @@ var DomEvent = (function(Type, Event, Dom) {
   //   matching the selector.
   var _delegateForwarder = function(delegator, selector, trigger) {
     var isDelegate = function(candidate, selector, delegator) {
-      var delegates = Dom(selector, delegator);
-      return (Array.prototype.indexOf.call(delegates, event.target) > -1);
+      var i, delegates = Dom(selector, delegator);
+      for(i in delegates) {
+        if(delegates[i] === event.target) { return true; }
+      }
+      return false;
     };
 
     // return partially applied function
