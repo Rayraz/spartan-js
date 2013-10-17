@@ -5,15 +5,16 @@ var DomEvent = (function(Type, Event, Dom) {
   // Event Object Compatibility
   // --------------------------
   var _fixEvent = function(event) {
+    var _returnTrue, _returnFalse, EnhancedEvent, i;
 
-    var _returnTrue = function() {
+    _returnTrue = function() {
       return true;
     };
-    var _returnFalse = function() {
+    _returnFalse = function() {
       return false;
     };
 
-    var EnhancedEvent = function() {
+    EnhancedEvent = function() {
       this.originalEvent                 = event;
       this.isDefaultPrevented            = _returnFalse;
       this.isPropagationStopped          = _returnFalse;
@@ -38,12 +39,28 @@ var DomEvent = (function(Type, Event, Dom) {
         this.isImmediatePropagationStopped = _returnTrue;
         this.stopPropagation();
       };
-      this.target = this.target || this.srcElement; // IE compat issue
-      if(this.target.nodeType == 3) {
+      // Firefox will not allow us to override event.target, so only set the
+      // target if it's not already there.
+      if(event.target === undefined) {
+        this.target = event.srcElement; // IE compat issue
+      }
+      if(event.target.nodeType == 3) {
         this.target = this.target.parentNode; // Safari bug
       }
     };
-    EnhancedEvent.prototype = event;
+    // Firefox complains because we don't imlement the full Event interface
+    // so we have to clone the original event rather than extending it.
+    for(i in event) {
+      if(Type.is('Function', event[i])) {
+        EnhancedEvent.prototype[i] = function() {
+          var e = this.originalEvent;
+          return e[i].apply(e, arguments);
+        }
+      }
+      else {
+        EnhancedEvent.prototype[i] = event[i];
+      }
+    }
 
     return new EnhancedEvent();
   };
@@ -127,7 +144,7 @@ var DomEvent = (function(Type, Event, Dom) {
     var isDelegate = function(candidate, selector, delegator) {
       var i, delegates = Dom(selector, delegator);
       for(i in delegates) {
-        if(delegates[i] === event.target) { return true; }
+        if(delegates[i] === candidate) { return true; }
       }
       return false;
     };
@@ -138,7 +155,11 @@ var DomEvent = (function(Type, Event, Dom) {
       event      = _fixEvent(event, this);
       if(isDelegate(event.target, selector, delegator)
         || isDelegate(event.target, selector + ' *', delegator)) {
-        this.events.trigger((event.eventName || event.type) + '(' + selector + ')', event);
+        // @TODO: I suspect this is a monkey-patch rather than how this is
+        // supposed to work.
+        if(!event.cancelBubble) {
+          this.events.trigger((event.eventName || event.type) + '(' + selector + ')', event);
+        }
       }
     };
   };
@@ -147,7 +168,11 @@ var DomEvent = (function(Type, Event, Dom) {
   var _eventForwarder = function(event) {
     event = event || window.event;
     event = _fixEvent(event, this);
-    this.events.trigger((event.eventName || event.type), event);
+    // @TODO: I suspect this is a monkey-patch rather than how this is supposed
+    // to work.
+    if(!event.cancelBubble) {
+      this.events.trigger((event.eventName || event.type), event);
+    }
   };
 
   // API
