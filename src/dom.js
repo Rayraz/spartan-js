@@ -8,7 +8,7 @@ var Dom = (function(Type, document) {
 			, _onlyElements
 			, _qsa;
 
-		// temporary nid, used for scoping
+		// Temporary nid, used for scoping
 		_tempNid = 'Dom'+ -(new Date()),
 
 		// Run selector for each element in scope
@@ -38,10 +38,10 @@ var Dom = (function(Type, document) {
 			var i
 				, elements = [];
 
-			// ensure array
+			// Ensure array
 			set = Type.is('Array', set) ? set : [set];
 
-			// filter elements
+			// Filter elements
 			for(i = 0; i < set.length; i++) {
 				if(Type.is('Element', set[i])) {
 					elements.push(set[i]);
@@ -59,19 +59,19 @@ var Dom = (function(Type, document) {
 			if(scope) {
 				_scopeNid = scope.getAttribute("id");
 
-				// ensure scope element has an id.
+				// Ensure scope element has an id.
 				if(!_scopeNid) {
 					scope.setAttribute("id", _tempNid);
 				}
 
-				// create scoped selector
+				// Create scoped selector
 				selector = '#' + (_scopeNid ? _scopeNid : _tempNid) + ' ' + selector;
 			}
 
-			// execute query
+			// Execute query
 			results = document.querySelectorAll(selector);
 
-			// remove temp nid from scope
+			// Remove temp nid from scope
 			if(scope && !_scopeNid) {
 				scope.removeAttribute("id");
 			}

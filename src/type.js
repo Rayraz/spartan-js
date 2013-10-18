@@ -66,6 +66,8 @@ var Type =(function() {
 	};
 
 	// API
+	// ---
+
 	return {
 		is: function(types, value) {
 			var i

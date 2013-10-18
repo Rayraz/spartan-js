@@ -74,20 +74,20 @@ var Style = (function(Type, document) {
 			, runtimeStyle
 			, hasRuntimeStyle = !!element.runtimeStyle;
 
-		// remember original values
+		// Remember original values
 		style = element.style.left;
 		if(hasRuntimeStyle) {
 			runtimeStyle = element.runtimeStyle.left;
 		}
 
-		// calculate pixel value
+		// Calculate pixel value
 		if(hasRuntimeStyle) {
 			element.runtimeStyle.left = element.currentStyle.left;
 		}
 		element.style.left = value || 0;
 		value              = element.style.pixelLeft;
 
-		// re-apply original values
+		// Re-apply original values
 		element.style.left = style;
 		if(hasRuntimeStyle) {
 			element.runtimeStyle.left = runtimeStyle;
@@ -100,7 +100,7 @@ var Style = (function(Type, document) {
 	// Custom Style Handlers
   // ---------------------
 
-	// stuff for IE alpha filter
+	// Stuff for IE alpha filter
 	_ieAlphaFilter = 'DXImageTransform.Microsoft.Alpha';
 	_ieAlphaRegexp = new RegExp("\\s*progid:" + _ieAlphaFilter + "\\([^\\)]+?\\)", "i");
 	_getIeFilter   = function(node) {
@@ -208,6 +208,8 @@ var Style = (function(Type, document) {
 	};
 
 	// API
+	// ---
+
 	return {
 		registerHandler: function(property, getter, setter) {
 			if(Type.is('Function', getter)) {

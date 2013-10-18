@@ -31,6 +31,7 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 		}
 	};
 	Animation.prototype = {
+
 		// Options
 		// -------
 
@@ -81,15 +82,15 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 				, tweens    = 0
 				, animation = {};
 
-			// which properties to animate
+			// Which properties to animate
 			for(property in end) {
 				properties.push(property);
 			}
 
-			// start state
+			// Start state
 			start = start || Style.get(this.element, properties);
 
-			// create tweens for each property
+			// Create tweens for each property
 			for(property in end) {
 				tween = this._createTween(property, start[property], end[property], mode, options);
 				if(tween) {
@@ -114,11 +115,11 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 
 			options = options || {};
 
-			// parse incoming states
+			// Parse incoming states
 			start = !Type.is('Object', start) ? this._parseProperty(String(start)) : start;
 			end   = !Type.is('Object', end)   ? this._parseProperty(String(end))   : end;
 
-			// property template
+			// Property template
 			tween.tpl = tween.tpl || start.tpl || end.tpl;
 
 			// Set start values
@@ -144,7 +145,7 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 				}
 			}
 
-			// validate tween
+			// Validate tween
 			if(tween.start.length !== tween.distance.length) {
 				console.log('Bad tween:', start, end, mode, options);
 			}
@@ -249,7 +250,7 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 
 			for(property in this._tweens) {
 
-				// get tween
+				// Get tween
 				tween             = this._tweens[property];
 				tween.prevTime    = tween.time || tween.startTime;
 				tween.time        = new Date().getTime();
@@ -258,25 +259,25 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 				tween.pervInertia = tween.inertia || new Array(tween.distance.length);
 				tween.inertia     = [];
 
-				// calculate how far along the animation we currently are
+				// Calculate how far along the animation we currently are
 				progress = (tween.time - tween.startTime) / tween.duration;
 				progress = (progress > 1) ? 1 : progress;
 				progress = (Easing[tween.easing] && Type.is('Function', Easing[tween.easing])) ? Easing[tween.easing](progress) : progress;
 
-				// iterate values
+				// Iterate values
 				for(i = 0; i < tween.start.length; i++) {
 
-					// calculate new values and inertia
+					// Calculate new values and inertia
 					value            = tween.start[i] + (tween.distance[i] * progress);
 					tween.values[i]  = tween.forceInt ? Math.round(value) : value;
 					tween.inertia[i] = ((tween.values[i] - tween.prevVals[i]) / (tween.time - tween.prevTime)) * 1000;
 				}
 
-				// generate new style
+				// Generate new style
 				style[property] = this._outputProperty(tween.tpl, tween.values);
 				hasStyles       = true;
 
-				// animation not done yet? re-queue the tween.
+				// Animation not done yet? re-queue the tween.
 				if(tween.time - tween.startTime < tween.duration) {
 					remainingTweens[property] = tween;
 				}
@@ -285,13 +286,13 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 				}
 			}
 
-			// apply new styles
+			// Apply new styles
 			if(this.onTick) {
 				style = this.onTick(style, this._tweens) || style;
 			}
 			Style.set(this.element, style);
 
-			// requeue left-over tweens
+			// Requeue left-over tweens
 			this._tweens = remainingTweens;
 		},
 
@@ -347,25 +348,25 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 				properties[i] = Type.is('Array', property) ? property: [property, finish];
 			}
 
-			// stop tweens
+			// Stop tweens
 			for(i in properties) {
 				property = properties[i][0];
 				finish   = properties[i][1];
 				tween    = this._tweens[property];
 
-				// fastforward tween
+				// Fastforward tween
 				if(finish && tween) {
 					this._tweens[property].duration = 0;
 					this._tweens[property].decay    = 0;
 				}
 
-				// stop tween in mid-animation
+				// Stop tween in mid-animation
 				else if(tween) {
 					delete this._tweens[property];
 					this.event.trigger('tween:interrupted', tween);
 				}
 
-				// remove queued tween
+				// Remove queued tween
 				tween = this._newAnimations[property];
 				delete this._newAnimations[property];
 				this.event.trigger('tween:cancelled', tween);

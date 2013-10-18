@@ -15,6 +15,7 @@ var DomEvent = (function(Type, Event, Dom) {
 
 	// Event Object Compatibility
 	// --------------------------
+
 	_fixEvent = function(event) {
 		var _returnTrue
 			, _returnFalse
@@ -194,7 +195,7 @@ var DomEvent = (function(Type, Event, Dom) {
 			return false;
 		};
 
-		// return partially applied function
+		// Return partially applied function
 		return function(event) {
 			event = event || window.event;
 			event = _fixEvent(event, this);
@@ -377,7 +378,7 @@ var DomEvent = (function(Type, Event, Dom) {
 						element.detachEvent('onlosecapture', handler[trigger]);
 					}
 
-					// the forwarder is of no use now either
+					// The forwarder is of no use now either
 					delete handler[trigger];
 				}
 			}
