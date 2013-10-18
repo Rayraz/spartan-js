@@ -1,9 +1,11 @@
 var UID = (function() {
 
-  var id = 0;
+	"use strict";
 
-  return function() {
-    return id++;
-  };
+	var id = 0;
+
+	return function() {
+		return id++;
+	};
 
 })();

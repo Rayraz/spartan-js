@@ -1,224 +1,267 @@
 var Style = (function(Type, document) {
 
-  "use strict";
+	"use strict";
 
-  var docEl = document.documentElement;
+  var docEl
+  	, _prefixMap
+  	, nonstandard
+  	, _pixelPropertyRegexp
+  	, _isPixelValueRegexp
+  	, _hasUnitRegexp
+  	, _nonDigitRegexp
+  	, _getPixelValue
+  	, _ieAlphaFilter
+  	, _ieAlphaRegexp
+  	, _getIeFilter
+  	, _customHandlers
+  	, _getProperty
+  	, _setProperty;
 
-  /**
-   * Vendor Prefix mapping
-   *
-   * This function generates a mapping of unprefixed css properties to their
-   * vendor-prefixed counterparts as declared in the CSSStyleDeclaration object.
-   */
-  var _prefixMap = (function(docEl) {
-    var prefixes, styles, property, i, prefix, unprefixed, map = [];
-    prefixes = ['webkit','Webkit','Moz', 'ms', 'O', 'khtml', 'Khtml'];
-    // TODO: IE Test
-    styles   = window.currentStyle || window.getComputedStyle(docEl, '');
-    for(property in styles) {
-      for(i in prefixes) {
-        prefix = prefixes[i];
-        if(property != 'length' && property.match(/[a-zA-Z]/)) {
-          if(property.indexOf(prefix) === 0) {
-            unprefixed      = property.substring(prefix.length, property.length);
-            unprefixed      = unprefixed.charAt(0).toLowerCase() + unprefixed.slice(1);
-            map[unprefixed] = property;
-            break;
-          }
-          else { map[property] = property; }
-        }
-      }
-    }
-    return map;
-  })(docEl);
+	docEl = document.documentElement;
 
-  /**
-   * IE bullshit detection
-   */
-  var nonstandard = {
-    ieOpacity: !!docEl.className.match(/(ie8|ielt9)/gi),
-    ieFloat:   !!("cssFloat" in docEl.style)
-  };
+	// Vendor Prefix mapping
+	//
+	// This function generates a mapping of unprefixed css properties to their
+	// vendor-prefixed counterparts as declared in the CSSStyleDeclaration object.
+	_prefixMap = (function(docEl) {
+		var prefixes
+			, styles
+			, property
+			, i
+			, prefix
+			, unprefixed
+			, map = [];
 
-  /**
-   * Convert non-pixel values to pixels values (IE<=8) element.currentStyle
-   */
-  var _pixelPropertyRegexp = /(top|right|bottom|left|^(fontSize|lineHeight|width|height)$)/i;
-  var _isPixelValueRegexp  = /^((-\d+\.\d+|\d+\.\d+|-\.\d+|\.\d+|-\d+|\d+)(px))?$/i;
-  var _hasUnitRegexp       = /^auto$|[a-zA-Z%]$/i;
-  var _nonDigitRegexp      = /[^-\d\.]/g;
-  var _getPixelValue       = function(element, value) {
-    if(_isPixelValueRegexp.test(value)) { return value; }
-    var style, runtimeStyle, hasRuntimeStyle = !!element.runtimeStyle;
-    // remember original values
-    style = element.style.left;
-    if(hasRuntimeStyle) { runtimeStyle = element.runtimeStyle.left; }
-    // calculate pixel value
-    if(hasRuntimeStyle) { element.runtimeStyle.left = element.currentStyle.left; }
-    element.style.left = value || 0;
-    value              = element.style.pixelLeft;
-    // re-apply original values
-    element.style.left = style;
-    if(hasRuntimeStyle) { element.runtimeStyle.left = runtimeStyle; }
+		prefixes = ['webkit','Webkit','Moz', 'ms', 'O', 'khtml', 'Khtml'];
 
-    return value;
-  };
+		// TODO: IE Test
+		styles   = window.currentStyle || window.getComputedStyle(docEl, '');
+		for(property in styles) {
+			for(i in prefixes) {
+				prefix = prefixes[i];
+				if(property != 'length' && property.match(/[a-zA-Z]/)) {
+					if(property.indexOf(prefix) === 0) {
+						unprefixed      = property.substring(prefix.length, property.length);
+						unprefixed      = unprefixed.charAt(0).toLowerCase() + unprefixed.slice(1);
+						map[unprefixed] = property;
+						break;
+					}
+					else {
+						map[property] = property;
+					}
+				}
+			}
+		}
+		return map;
+	})(docEl);
 
-  /**
-   * Some styles need custom treatment
-   */
-  // stuff for IE alpha filter
-  var _ieAlphaFilter = 'DXImageTransform.Microsoft.Alpha';
-  var _ieAlphaRegexp = new RegExp("\\s*progid:" + _ieAlphaFilter + "\\([^\\)]+?\\)", "i");
-  var _getIeFilter   = function(node) {
-    try {
-      return node.filters.item(_ieAlphaFilter);
-    } catch(e) {
-      return null;
-    }
-  };
+	// IE bullshit detection
+	nonstandard = {
+		ieOpacity: !!docEl.className.match(/(ie8|ielt9)/gi),
+		ieFloat:   !!("cssFloat" in docEl.style)
+	};
 
-  /**
-   * Custom properties
-   */
-  var _customHandlers = {
-    get: {
-      "float": function(node) {
-        var property = nonstandard.ieFloat ? "cssFloat" : "styleFloat";
-        return _getProperty(node, property);
-      },
-      opacity: function(node) {
-        if(nonstandard.ieOpacity) {
-          var filter = _getIeFilter(node);
-          return filter ? filter.Opacity / 100 : 1;
-        }
-        return _getProperty(node, 'opacity');
-      },
-      width: function(node) {
-        return _getProperty(node, 'width');
-      },
-      height: function(node) {
-        return _getProperty(node, 'height');
-      },
-      clientWidth: function(node) {
-        return node.clientWidth;
-      },
-      clientHeight: function(node) {
-        return node.clientHeight;
-      },
-      offsetWidth: function(node) {
-        return node.offsetWidth;
-      },
-      offsetHeight: function(node) {
-        return node.offsetHeight;
-      },
-      scrollWidth: function(node) {
-        return node.scrollWidth;
-      },
-      scrollHeight: function(node) {
-        return node.scrollHeight;
-      }
-    },
-    set: {
-      "float": function(node, value) {
-        var property = nonstandard.ieFloat ? "cssFloat" : "styleFloat";
-        return _setProperty(node, property, value);
-      },
-      opacity: function(node, value) {
-        var filter;
-        if(nonstandard.ieOpacity) {
-          value  = value >= 1 ? 100 : value * 100;
-          filter = _getIeFilter(node);
-          if(value >= 100 && filter) {
-            node.style.filter.replace(_ieAlphaRegexp, "");
-            return;
-          }
-          else if(filter) {
-            filter.Opacity = value;
-          }
-          else {
-            node.style.filter += " progid:" + _ieAlphaFilter + "(Opacity=" + value + ")";
-          }
-          filter.Enabled = true;
-          return;
-        }
-        else {
-          return _setProperty(node, "opacity", value);
-        }
-      }
-    }
-  };
+	// Convert non-pixel values to pixels values (IE<=8) element.currentStyle
+	_pixelPropertyRegexp = /(top|right|bottom|left|^(fontSize|lineHeight|width|height)$)/i;
+	_isPixelValueRegexp  = /^((-\d+\.\d+|\d+\.\d+|-\.\d+|\.\d+|-\d+|\d+)(px))?$/i;
+	_hasUnitRegexp       = /^auto$|[a-zA-Z%]$/i;
+	_nonDigitRegexp      = /[^-\d\.]/g;
+	_getPixelValue       = function(element, value) {
+		if(_isPixelValueRegexp.test(value)) {
+			return value;
+		}
+		var style
+			, runtimeStyle
+			, hasRuntimeStyle = !!element.runtimeStyle;
 
-  /**
-   * Default style getter
-   */
-  var _getProperty = function(node, property) {
-    var _getPrefixedStyle, computed, value;
+		// remember original values
+		style = element.style.left;
+		if(hasRuntimeStyle) {
+			runtimeStyle = element.runtimeStyle.left;
+		}
 
-    if(!node.currentStyle) {
-      computed = document.defaultView.getComputedStyle(node, "");
-      value    =  computed.getPropertyValue(property) /* IE9 with css filters */
-               || computed[_prefixMap[property]];
-    }
-    else { // IE<=8
-      value = node.currentStyle[property];
-    }
-    return _pixelPropertyRegexp.test(property)
-         ? _getPixelValue(node, value)
-         : value;
-  };
+		// calculate pixel value
+		if(hasRuntimeStyle) {
+			element.runtimeStyle.left = element.currentStyle.left;
+		}
+		element.style.left = value || 0;
+		value              = element.style.pixelLeft;
 
-  /**
-   * Default style setter
-   */
-  var _setProperty = function(node, property, value) {
-    if(_pixelPropertyRegexp.test(property)) {
-      value = _hasUnitRegexp.test(value) ? value : value + 'px';
-    }
-    node.style[_prefixMap[property]] = value;
-  };
+		// re-apply original values
+		element.style.left = style;
+		if(hasRuntimeStyle) {
+			element.runtimeStyle.left = runtimeStyle;
+		}
 
-  /**
-   * API
-   */
-  return {
-    registerHandler: function(property, getter, setter) {
-      if(Type.is('Function', getter)) { _customHandlers.get[property] = getter; }
-      if(Type.is('Function', setter)) { _customHandlers.set[property] = setter; }
-    },
-    get: function(node, properties, unitless) {
-      if(node === document) { node = document.documentElement; }
-      if(!Type.is('Element', node)) { return {}; }
-      var i, styles = {}, style, asArray = Type.is('Array', properties);
-      properties = asArray ? properties : [properties];
+		return value;
+	};
 
-      for(i = 0; i < properties.length; i++) {
-        style = _customHandlers.get[properties[i]]
-              ? _customHandlers.get[properties[i]](node)
-              : _getProperty(node, properties[i]);
-        styles[properties[i]] = (unitless)
-                              ? parseFloat(style.replace(_nonDigitRegexp))
-                              : style;
-      }
 
-      return (asArray) ? styles : styles[properties[--i]];
-    },
-    set: function(node, styles) {
-      if(node === document) { node = document.documentElement; }
-      if(!Type.is('Element', node)) { return {}; }
-      var property, value;
-      for(property in styles) {
-        if(styles.hasOwnProperty(property)) {
-          value = styles[property];
-          if(_customHandlers.set[property]) {
-            _customHandlers.set[property](node, value);
-          }
-          else {
-            _setProperty(node, property, value);
-          }
-        }
-      }
-    }
-  };
+	// Custom Style Handlers
+  // ---------------------
+
+	// stuff for IE alpha filter
+	_ieAlphaFilter = 'DXImageTransform.Microsoft.Alpha';
+	_ieAlphaRegexp = new RegExp("\\s*progid:" + _ieAlphaFilter + "\\([^\\)]+?\\)", "i");
+	_getIeFilter   = function(node) {
+		try {
+			return node.filters.item(_ieAlphaFilter);
+		} catch(e) {
+			return null;
+		}
+	};
+
+	_customHandlers = {
+		get: {
+			"float": function(node) {
+				var property = nonstandard.ieFloat ? "cssFloat" : "styleFloat";
+				return _getProperty(node, property);
+			},
+			opacity: function(node) {
+				if(nonstandard.ieOpacity) {
+					var filter = _getIeFilter(node);
+					return filter ? filter.Opacity / 100 : 1;
+				}
+				return _getProperty(node, 'opacity');
+			},
+			width: function(node) {
+				return _getProperty(node, 'width');
+			},
+			height: function(node) {
+				return _getProperty(node, 'height');
+			},
+			clientWidth: function(node) {
+				return node.clientWidth;
+			},
+			clientHeight: function(node) {
+				return node.clientHeight;
+			},
+			offsetWidth: function(node) {
+				return node.offsetWidth;
+			},
+			offsetHeight: function(node) {
+				return node.offsetHeight;
+			},
+			scrollWidth: function(node) {
+				return node.scrollWidth;
+			},
+			scrollHeight: function(node) {
+				return node.scrollHeight;
+			}
+		},
+		set: {
+			"float": function(node, value) {
+				var property = nonstandard.ieFloat ? "cssFloat" : "styleFloat";
+				return _setProperty(node, property, value);
+			},
+			opacity: function(node, value) {
+				var filter;
+
+				if(nonstandard.ieOpacity) {
+					value  = value >= 1 ? 100 : value * 100;
+					filter = _getIeFilter(node);
+					if(value >= 100 && filter) {
+						node.style.filter.replace(_ieAlphaRegexp, "");
+						return;
+					}
+					else if(filter) {
+						filter.Opacity = value;
+					}
+					else {
+						node.style.filter += " progid:" + _ieAlphaFilter + "(Opacity=" + value + ")";
+					}
+					filter.Enabled = true;
+					return;
+				}
+				else {
+					return _setProperty(node, "opacity", value);
+				}
+			}
+		}
+	};
+
+	// Default style getter
+	_getProperty = function(node, property) {
+		var _getPrefixedStyle
+			, computed
+			, value;
+
+		if(!node.currentStyle) {
+			computed = document.defaultView.getComputedStyle(node, "");
+			value    =  computed.getPropertyValue(property) /* IE9 with css filters */
+							 || computed[_prefixMap[property]];
+		}
+		else { // IE<=8
+			value = node.currentStyle[property];
+		}
+		return _pixelPropertyRegexp.test(property)
+				 ? _getPixelValue(node, value)
+				 : value;
+	};
+
+	// Default style setter
+	_setProperty = function(node, property, value) {
+		if(_pixelPropertyRegexp.test(property)) {
+			value = _hasUnitRegexp.test(value) ? value : value + 'px';
+		}
+		node.style[_prefixMap[property]] = value;
+	};
+
+	// API
+	return {
+		registerHandler: function(property, getter, setter) {
+			if(Type.is('Function', getter)) {
+				_customHandlers.get[property] = getter;
+			}
+			if(Type.is('Function', setter)) {
+				_customHandlers.set[property] = setter;
+			}
+		},
+		get: function(node, properties, unitless) {
+			if(node === document) {
+				node = document.documentElement;
+			}
+			if(!Type.is('Element', node)) {
+				return {};
+			}
+			var i
+				, styles = {}
+				, style
+				, asArray = Type.is('Array', properties);
+
+			properties = asArray ? properties : [properties];
+
+			for(i = 0; i < properties.length; i++) {
+				style = _customHandlers.get[properties[i]]
+							? _customHandlers.get[properties[i]](node)
+							: _getProperty(node, properties[i]);
+				styles[properties[i]] = (unitless)
+															? parseFloat(style.replace(_nonDigitRegexp))
+															: style;
+			}
+
+			return (asArray) ? styles : styles[properties[--i]];
+		},
+		set: function(node, styles) {
+			if(node === document) {
+				node = document.documentElement;
+			}
+			if(!Type.is('Element', node)) {
+				return {};
+			}
+			var property, value;
+			for(property in styles) {
+				if(styles.hasOwnProperty(property)) {
+					value = styles[property];
+					if(_customHandlers.set[property]) {
+						_customHandlers.set[property](node, value);
+					}
+					else {
+						_setProperty(node, property, value);
+					}
+				}
+			}
+		}
+	};
 
 })(Type, document);
