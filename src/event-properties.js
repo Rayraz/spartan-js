@@ -17,7 +17,7 @@ var EventProps = (function(Type) {
 			var i
 				, properties = [];
 
-			pointers = pointers || 0;
+			pointers = pointers || [0];
 			if(Type.is('Array', pointers)) {
 				for(i in pointers) {
 					properties.push(this._pointerCoordinate(event, pointers[i], axis));
@@ -55,9 +55,16 @@ var EventProps = (function(Type) {
 			}
 		},
 		get: function(event, property /* args */) {
-			return _customHandlers[property]
-					 ? _customHandlers[property].apply(_customHandlers, arguments)
-					 : event[property];
+			var args;
+
+			if(_customHandlers[property]) {
+				args = Array.prototype.slice.call(arguments, 2);
+				args.unshift(event);
+				return _customHandlers[property].apply(_customHandlers, args);
+			}
+			else {
+				return event[property];
+			}
 		}
 	};
 

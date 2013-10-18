@@ -185,6 +185,7 @@ var DomEvent = (function(Type, Event, Dom) {
 		var isDelegate = function(candidate, selector, delegator) {
 			var i
 				, delegates = Dom(selector, delegator);
+
 			for(i in delegates) {
 				if(delegates[i] === candidate) {
 					return true;
