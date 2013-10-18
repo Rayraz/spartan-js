@@ -66,9 +66,15 @@ var DomEvent = (function(Type, Event, Dom) {
 			if(event.target === undefined) {
 				this.target = event.srcElement; // IE compat issue
 			}
-			if(event.target.nodeType == 3) {
+			else if(event.target.nodeType == 3) {
 				this.target = this.target.parentNode; // Safari bug
 			}
+			else {
+				this.target = this.target;
+			}
+
+			// Check for custom eventName
+			this.type = (event.eventName) ? event.eventName : event.type;
 		};
 
 		// Firefox complains because we don't imlement the full Event interface
@@ -197,7 +203,7 @@ var DomEvent = (function(Type, Event, Dom) {
 				// @TODO: I suspect this is a monkey-patch rather than how this is
 				// supposed to work.
 				if(!event.cancelBubble) {
-					this.events.trigger((event.eventName || event.type) + '(' + selector + ')', event);
+					this.events.trigger(event.type + '(' + selector + ')', event);
 				}
 			}
 		};
@@ -211,7 +217,7 @@ var DomEvent = (function(Type, Event, Dom) {
 		// @TODO: I suspect this is a monkey-patch rather than how this is supposed
 		// to work.
 		if(!event.cancelBubble) {
-			this.events.trigger((event.eventName || event.type), event);
+			this.events.trigger(event.type, event);
 		}
 	};
 
