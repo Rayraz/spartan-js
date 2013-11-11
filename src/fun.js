@@ -1,76 +1,70 @@
-var Fun = (function() {
+var Fun = (function(Type) {
 
-	var Fun = {
-		// Returns a function, that, as long as it continues to be invoked, will not
-		// be triggered. The function will be called after it stops being called for
-		// N milliseconds. If `immediate` is passed, trigger the function on the
-		// leading edge, instead of the trailing.
-		debounce: function(func, wait, immediate) {
-			var timeout
-				, args
-				, context
-				, timestamp
-				, result;
+	"use strict";
 
-			return function() {
-				var later, callNow;
+	var Debouncer, Memoizer;
 
-				context   = this;
-				args      = arguments;
-				timestamp = (new Date()).getTime();
-				later     = function() {
-					var last = (new Date()).getTime() - timestamp;
-
-					if(last < wait) {
-						timeout = setTimeout(later, wait - last);
-					}
-					else {
-						timeout = null;
-						if(!immediate) {
-							result = func.apply(context, args);
-						}
-					}
-				};
-				callNow = immediate && !timeout;
-				if(!timeout) {
-					timeout = setTimeout(later, wait);
-				}
-				if(callNow) {
-					result = func.apply(context, args);
-				}
-				return result;
-			};
-		};
-	};
-
-	Fun.memoize = function(fn, args, ctx) {
-		if(this instanceof memoize) {
-			if(arguments.length) {
-				this._memoized = false;
-				this._cache    = undefined;
-				this._original = fn;
-				this._args     = args;
-				this._ctx      = ctx;
-			}
-			else {
-				return this.reply();
-			}
+	Debouncer = function(delay, fun, ctx, args) {
+		if(this instanceof Debouncer) {
+			this.reset.apply(this, arguments);
+			return this;
 		}
 		else {
-			return new memoize(fn, args, ctx);
+			return new Debouncer(delay, fun, ctx, args);
 		}
 	};
-	Memoize.prototype = {
+	Debouncer.prototype = {
+		_tick: function() {
+			var that = this;
+			clearTimeout(this._timeout);
+			this._timeout = setTimeout(function() {
+				that._fun.apply(that._ctx, that._args);
+			}, this._delay);
+		},
+		go: function(/* polymorphic */) {
+			this._args = arguments;
+			this._tick();
+		},
+		reset: function(delay, fun, ctx, args) {
+			clearTimeout(this._timeout);
+			this._delay = delay;
+			this._fun   = fun;
+			this._ctx   = ctx;
+			this._args  = args;
+		}
+	};
+
+	Memoizer = function(ffun, ctx, args) {
+		if(this instanceof Memoizer) {
+			this.reset.apply(this, arguments);
+			return this;
+		}
+		else {
+			return new Memoizer(ffun, ctx, args);
+		}
+	}
+	Memoizer.prototype = {
 		reply: function() {
 			if(!this._memoized) {
-				this._cache    = this._original.apply(this._ctx, this._args);
+				this._cache    = this._fun.apply(this._ctx, this._args);
 				this._memoized = true;
 			}
 			return this._cache;
 		},
-		expire: function() {
-			this._memoized = false;
+		reset: function(ffun, ctx, args) {
+			if(arguments.length) {
+				this._memoized = false;
+				this._cache    = undefined;
+				this._fun      = fun;
+				this._args     = args;
+				this._ctx      = ctx;
+			}
 		}
 	};
 
-})();
+	return {
+		memoizer: Memoizer,
+		debounce: Debouncer
+	};
+
+})(Type);
