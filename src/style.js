@@ -2,20 +2,20 @@ var Style = (function(Type, document) {
 
 	"use strict";
 
-  var docEl
-  	, _prefixMap
-  	, nonstandard
-  	, _pixelPropertyRegexp
-  	, _isPixelValueRegexp
-  	, _hasUnitRegexp
-  	, _nonDigitRegexp
-  	, _getPixelValue
-  	, _ieAlphaFilter
-  	, _ieAlphaRegexp
-  	, _getIeFilter
-  	, _customHandlers
-  	, _getProperty
-  	, _setProperty;
+	var docEl
+		, _prefixMap
+		, nonstandard
+		, _pixelPropertyRegexp
+		, _isPixelValueRegexp
+		, _hasUnitRegexp
+		, _nonDigitRegexp
+		, _getPixelValue
+		, _ieAlphaFilter
+		, _ieAlphaRegexp
+		, _getIeFilter
+		, _customHandlers
+		, _getProperty
+		, _setProperty;
 
 	docEl = document.documentElement;
 
@@ -98,7 +98,7 @@ var Style = (function(Type, document) {
 
 
 	// Custom Style Handlers
-  // ---------------------
+	// ---------------------
 
 	// Stuff for IE alpha filter
 	_ieAlphaFilter = 'DXImageTransform.Microsoft.Alpha';
@@ -147,6 +147,20 @@ var Style = (function(Type, document) {
 			},
 			scrollHeight: function(node) {
 				return node.scrollHeight;
+			},
+			offsetLeft: function(node) {
+				var boundingClientRect = node.getBoundingClientRect()
+					, docEl              = document.documentElement
+					, win                = window;
+
+				return boundingClientRect.left + (win.pageXOffset || docEl.scrollLeft) - (docEl.clientLeft || 0);
+			},
+			offsetTop: function(node) {
+				var boundingClientRect = node.getBoundingClientRect()
+					, docEl              = document.documentElement
+					, win                = window;
+
+				return boundingClientRect.top + (win.pageYOffset || docEl.scrollTop) - (docEl.clientTop || 0);
 			}
 		},
 		set: {
@@ -238,7 +252,7 @@ var Style = (function(Type, document) {
 							? _customHandlers.get[properties[i]](node)
 							: _getProperty(node, properties[i]);
 				styles[properties[i]] = (unitless)
-															? parseFloat(style.replace(_nonDigitRegexp))
+															? parseFloat(("" + style).replace(_nonDigitRegexp))
 															: style;
 			}
 
