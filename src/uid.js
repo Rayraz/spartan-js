@@ -1,11 +1,13 @@
-var UID = (function() {
+var Uid = (function() {
 
 	"use strict";
 
-	var id = 0;
+	var uids = {};
 
-	return function() {
-		return id++;
+	return function(prefix) {
+		prefix       = prefix || 'uid';
+		uids[prefix] = uids[prefix] || 0;
+		return prefix + '-' + ++uids[prefix];
 	};
 
 })();
