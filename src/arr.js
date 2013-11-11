@@ -4,22 +4,23 @@ var Arr = (function() {
 
 	return {
 		unique: function(arr) {
-			var result = []
-				, i
-				, n
-				, j
-				, match;
+      var result = []
+        , i , n , j
+        , match;
 
-			for(i = 0, n = arr.length; i < n; i++) {
-				match = false;
-				for(j in result) {
-					match = arr[i] === result[j];
-				}
-				if(!match) {
-					result.push(arr[i]);
-				}
-			}
-			return result;
+      for(i = 0, n = arr.length; i < n; i++) {
+        match = false;
+        for(j in result) {
+          if(arr[i] === result[j]) {
+            match = true;
+            break;
+          }
+        }
+        if(!match) {
+          result.push(arr[i]);
+        }
+      }
+      return result;
 		},
 		add: function(arr, value, unique) {
 			arr.push(value);
@@ -63,6 +64,27 @@ var Arr = (function() {
     },
     contains: function(arr, value) {
     	return this.indexOf(arr, value) > -1;
+    },
+    union: function(/* arrays */) {
+      var args   = []
+        , result = []
+        , a, b, i, j, n, o;
+
+      Array.prototype.push.apply(args, arguments);
+      a = args.shift() || [];
+      b = args.shift() || [];
+      n = a.length;
+      o = b.length;
+
+      for(i = 0; i < n; i++) {
+        for(j = 0; j < o; j++) {
+          if(a[i] === b[j]) {
+            result.push(a[i]);
+          }
+        }
+      }
+
+      return (args.length) ? this.union.apply(this, [result].concat(args)) : result;
     }
 	};
 
