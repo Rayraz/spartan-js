@@ -6,6 +6,9 @@ var DomEvent = (function(Type, Event, Dom) {
 		, _eventTags
 		, _eventSupportCache
 		, _isEventSupported
+		, _eventMap
+		, _eventTypeCache
+		, _eventType
 		, _getEventTarget
 		, _triggerEventDOM
 		, _triggerEventIE
@@ -30,6 +33,7 @@ var DomEvent = (function(Type, Event, Dom) {
 		};
 
 		EnhancedEvent = function() {
+			this.id                            = Uid('DomEvent');
 			this.originalEvent                 = event;
 			this.isDefaultPrevented            = _returnFalse;
 			this.isPropagationStopped          = _returnFalse;
@@ -112,7 +116,7 @@ var DomEvent = (function(Type, Event, Dom) {
 		var element
 			, isSupported;
 
-		if(Type.is('Undefined', _eventSupportCache[type])) {
+		if(_eventSupportCache[type] === undefined) {
 			type        = 'on' + type;
 			isSupported = (type in window);
 			if(!isSupported) {
@@ -127,6 +131,29 @@ var DomEvent = (function(Type, Event, Dom) {
 			_eventSupportCache[type] = isSupported;
 		}
 		return _eventSupportCache[type];
+	};
+
+	_eventMap = {
+		wheel: ['wheel', 'mousewheel', 'DOMMouseScroll', 'MozMousePixelScroll']
+	};
+	_eventTypeCache = {};
+	_eventType      = function(type) {
+		var i
+			, candidate;
+
+		if(!_eventMap[type]) {
+			return type;
+		}
+		if(!_eventTypeCache[type]) {
+			for(i in _eventMap[type]) {
+				candidate = _eventMap[type][i];
+				if(_isEventSupported(candidate)) {
+					_eventTypeCache[type] = candidate;
+					break;
+				}
+			}
+		}
+		return _eventTypeCache[type] || type;
 	};
 
 	// Custom Events
@@ -243,7 +270,7 @@ var DomEvent = (function(Type, Event, Dom) {
 				element = document.documentElement;
 			}
 			if(!Type.is(['Element', 'Window'], element)) {
-				return;
+				throw new Error("Bad argument: 'element' does not accept DomEvents", element);
 			}
 			var i
 				, trigger
@@ -262,7 +289,7 @@ var DomEvent = (function(Type, Event, Dom) {
 
 			// Bind listeners
 			else {
-				trigger = type = types.pop();
+				trigger = type = _eventType(types.pop());
 
 				if(!Type.is('String', scope)) {
 					context   = listeners;
@@ -319,7 +346,7 @@ var DomEvent = (function(Type, Event, Dom) {
 				element = document.documentElement;
 			}
 			if(!Type.is(['Element', 'Window'], element)) {
-				return;
+				throw new Error("Bad argument: 'element' does not accept DomEvents", element);
 			}
 			var i
 				, trigger
@@ -337,7 +364,7 @@ var DomEvent = (function(Type, Event, Dom) {
 
 			// Bind listeners
 			else {
-				trigger = type = types.pop();
+				trigger = type = _eventType(types.pop());
 
 				if(!Type.is('String', scope)) {
 					context   = listeners;
