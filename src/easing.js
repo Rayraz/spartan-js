@@ -1,5 +1,15 @@
 EasingFunctions = {
 
+  // Immediately skip to end of animation
+  start: function(t) {
+  	return t > 0 ? 1 : 0;
+  },
+
+  // Stick to beginning of animation until last frame
+  end: function(t) {
+  	return t < 1 ? 0 : 1;
+  },
+
 	// No easing, no Acceleration
 	linear: function (t) {
 		return t;
