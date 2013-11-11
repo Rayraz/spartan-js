@@ -1,5 +1,7 @@
 var WindowAnimationTiming = (function(window) {
 
+	"use strict";
+
 	var cancelAnimationFrame, requestAnimationFrame;
 
 	// Local WindowAnimationTiming interface
