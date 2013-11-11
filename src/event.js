@@ -71,9 +71,14 @@ var Event = (function(Type) {
 					match    = false;
 					listener = listeners[i];
 					listener = Type.is('Array', listener) ? listener : [listener, context];
+
+					// Already registered?
 					for(j in registered) {
 						match = registered[j] === listener;
+						break;
 					}
+
+					// Not already bound, register listener.
 					if(!match) {
 						registered.push(listener);
 					}
