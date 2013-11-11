@@ -109,7 +109,7 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 				, param
 				, tween = {
 					property:  property,
-					startTime: new Date().getTime(),
+					startTime: +new Date(),
 					distance:  []
 				};
 
@@ -147,7 +147,7 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 
 			// Validate tween
 			if(tween.start.length !== tween.distance.length) {
-				console.log('Bad tween:', start, end, mode, options);
+				throw new Error('Bad tween:', start, end, mode, options);
 			}
 			else {
 				return tween;
@@ -253,7 +253,7 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 				// Get tween
 				tween             = this._tweens[property];
 				tween.prevTime    = tween.time || tween.startTime;
-				tween.time        = new Date().getTime();
+				tween.time        = +new Date();
 				tween.prevVals    = tween.values || tween.start;
 				tween.values      = [];
 				tween.pervInertia = tween.inertia || new Array(tween.distance.length);
@@ -308,6 +308,8 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 					that._tick();
 				});
 			}
+
+			return this;
 		},
 		transform: function(transformation, options) {
 			var that = this;
@@ -318,12 +320,17 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 					that._tick();
 				});
 			}
+
+			return this;
 		},
 		stop: function(properties, finish) {
 			var property
 				, i
 				, animation
 				, tween;
+
+			// Interrupt animation loop
+			cancelAnimationFrame(this._frame);
 
 			// Stop all properties
 			if(Type.is('Boolean', properties)) {
@@ -335,12 +342,8 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 				for(property in this._newAnimations) {
 					properties.push(property);
 				}
-				this.stop(properties, finish);
-				return;
+				return this.stop(properties, finish);
 			}
-
-			// Interrupt animation loop
-			cancelAnimationFrame(this._frame);
 
 			// Create [property,finish] tuples.
 			for(i in properties) {
@@ -374,6 +377,8 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 
 			// Continue animation loop
 			this._tick();
+
+			return this;
 		}
 	};
 
