@@ -24,26 +24,24 @@ var Iterator = (function() {
 		rewind: function() {
 			this._cursor = 0;
 		},
-		previous: function() {
-			if(this._cursor == 0) {
-				return undefined;
+		prev: function(options) {
+			var options = options || this.options;
+
+			if(--this._cursor < 0) {
+				this._cursor = (options.circular) ? this.array.length-- : undefined;
 			}
-			else {
-				--this._cursor;
-				return this.current();
-			}
+			return this.current();
 		},
 		current: function() {
 			return this.array[this._cursor];
 		},
 		next: function(options) {
-			if(this._cursor == this.array.length - 1) {
-				return undefined;
+			var options = options || this.options;
+
+			if(++this._cursor == this.array.length) {
+				this._cursor = (options.circular) ? 0 : undefined;
 			}
-			else {
-				++this._cursor;
-				return this.current();
-			}
+			return this.current();
 		},
 		first: function() {
 			this.rewind();
@@ -68,6 +66,7 @@ var Iterator = (function() {
 		},
 		indexOf: function(value) {
 			var i, n;
+
 			// find index of value
 			for(i = 0, n = this.array.length; i < n; i++) {
 				if(this.array[i] == value) {
