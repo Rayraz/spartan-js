@@ -17,7 +17,7 @@ var EventProps = (function(Type) {
 			var i
 				, properties = [];
 
-			pointers = pointers || [0];
+			pointers = (pointers === undefined) ? 0 : pointers;
 			if(Type.is('Array', pointers)) {
 				for(i in pointers) {
 					properties.push(this._pointerCoordinate(event, pointers[i], axis));
@@ -29,7 +29,7 @@ var EventProps = (function(Type) {
 			}
 		},
 		_pointerCoordinate: function(event, pointer, axis) {
-			var eventType = event.eventName || event.type;
+			var eventType = event.type;
 
 			if(eventType.match(/^touch/)) {
 				return event.touches[pointer]['page' + axis];
