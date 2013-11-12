@@ -1,8 +1,10 @@
-var Fun = (function(Type) {
+SpartanJS.register('Fun', function(SpartanJS) {
 
 	"use strict";
 
-	var Debouncer, Memoizer;
+	var Type = SpartanJS.require('Type')
+		, Debouncer
+		, Memoizer;
 
 	Debouncer = function(delay, fun, ctx, args) {
 		if(this instanceof Debouncer) {
@@ -67,4 +69,4 @@ var Fun = (function(Type) {
 		debounce: Debouncer
 	};
 
-})(Type);
+});

@@ -1,4 +1,4 @@
-var Uid = (function() {
+SpartanJS.register('Uid', function() {
 
 	"use strict";
 
@@ -10,4 +10,4 @@ var Uid = (function() {
 		return prefix + '-' + ++uids[prefix];
 	};
 
-})();
+});

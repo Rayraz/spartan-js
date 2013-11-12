@@ -1,8 +1,14 @@
-var DomEvent = (function(Type, Event, Dom) {
+SpartanJS.register('DomEvent', function(SpartanJS) {
 
 	"use strict";
 
-	var _fixEvent
+	var // SpartanJS Components
+			Dom   = SpartanJS.require('Dom')
+		, Event = SpartanJS.require('Event')
+		, Type  = SpartanJS.require('Type')
+		, Uid   = SpartanJS.require('Uid')
+			// Local
+		, _fixEvent
 		, _eventTags
 		, _eventSupportCache
 		, _isEventSupported
@@ -412,4 +418,4 @@ var DomEvent = (function(Type, Event, Dom) {
 		}
 	};
 
-})(Type, Event, Dom);
+});

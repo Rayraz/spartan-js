@@ -1,1 +1,0 @@
-Expando = "SpartanJs" + -new Date();

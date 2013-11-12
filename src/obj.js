@@ -1,6 +1,8 @@
-var Obj = (function(Type) {
+SpartanJS.register('Obj', function(SpartanJS) {
 
 	"use strict";
+
+	var Type = SpartanJS.require('Type');
 
 	return {
 		extend: function(object, /* polymorphic, */ recursive) {
@@ -52,4 +54,4 @@ var Obj = (function(Type) {
 		}
 	};
 
-})(Type);
+});

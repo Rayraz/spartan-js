@@ -1,8 +1,14 @@
-var ResponsiveFigure = (function(Event, DeferredImage, Style) {
+SpartanJS.register('ResponsiveFigure', function(SpartanJS) {
 
 	"use strict";
 
-	var ResponsiveFigure;
+	var // SpartanJS Components
+			Dom           = SpartanJS.require('Dom')
+		, DeferredImage = SpartanJS.require('DeferredImage')
+		, Event         = SpartanJS.require('Event')
+		, Style         = SpartanJS.require('Style')
+			// Local
+		, ResponsiveFigure;
 
 	ResponsiveFigure = function($figure, options) {
 		var i
@@ -80,21 +86,21 @@ var ResponsiveFigure = (function(Event, DeferredImage, Style) {
 				, oldImage
 				, newImage;
 
+			this.event.trigger('loaded', this);
 			if(queuedMode) {
+				newImage = this.modes[queuedMode];
+				newImage.event.off('loaded', this.onLoad, this);
+				Style.set(newImage.$img, { display: 'block' });
 				if(activeMode) {
 					oldImage = this.modes[activeMode];
 					Style.set(oldImage.$img, { display: 'none' });
 				}
-				newImage = this.modes[queuedMode];
-				newImage.event.off('loaded', this.onLoad, this);
-				Style.set(newImage.$img, { display: 'block' });
 				this.activeMode = queuedMode;
 				this.queuedMode = undefined;
 			}
-			this.event.trigger('loaded', this);
 		}
 	};
 
 	return ResponsiveFigure;
 
-})(Event, DeferredImage, Style);
+});

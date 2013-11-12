@@ -1,8 +1,8 @@
-var Arr = (function() {
+SpartanJS.register('Arr', function() {
 
 	"use strict";
 
-	return {
+  return {
 		unique: function(arr) {
       var result = []
         , i , n , j
@@ -88,4 +88,4 @@ var Arr = (function() {
     }
 	};
 
-})();
+});

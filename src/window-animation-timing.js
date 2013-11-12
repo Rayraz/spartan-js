@@ -1,8 +1,9 @@
-var WindowAnimationTiming = (function(window) {
+SpartanJS.register('WindowAnimationTiming', function() {
 
 	"use strict";
 
-	var cancelAnimationFrame, requestAnimationFrame;
+	var cancelAnimationFrame
+		, requestAnimationFrame;
 
 	// Local WindowAnimationTiming interface
 	cancelAnimationFrame  = window.cancelAnimationFrame || window.cancelRequestAnimationFrame;
@@ -49,4 +50,4 @@ var WindowAnimationTiming = (function(window) {
 		cancelAnimationFrame:  cancelAnimationFrame
 	};
 
-})(window);
+});

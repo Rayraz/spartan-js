@@ -1,8 +1,9 @@
-var Style = (function(Type, document) {
+SpartanJS.register('Style', function(SpartanJS) {
 
 	"use strict";
 
-	var docEl
+	var Type = SpartanJS.require('Type')
+		, docEl
 		, _prefixMap
 		, nonstandard
 		, _pixelPropertyRegexp
@@ -280,4 +281,4 @@ var Style = (function(Type, document) {
 		}
 	};
 
-})(Type, document);
+});

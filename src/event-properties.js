@@ -1,8 +1,10 @@
-var EventProps = (function(Type) {
+SpartanJS.register('EventProps', function(SpartanJS) {
 
 	"use strict";
 
-  var _bodyEl, _customHandlers;
+	var Type = SpartanJS.require('Type')
+  	, _bodyEl
+  	, _customHandlers;
 
 	_bodyEl = document.body;
 
@@ -68,4 +70,4 @@ var EventProps = (function(Type) {
 		}
 	};
 
-})(Type);
+});

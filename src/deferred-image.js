@@ -1,8 +1,14 @@
-var DeferredImage = (function(Event, Style, DomEvent) {
+SpartanJS.register('DeferredImage', function(SpartanJS) {
 
 	"use strict";
 
-	var DeferredImage;
+	var // SpartanJS Components
+			DomEvent = SpartanJS.require('DomEvent')
+		, Event    = SpartanJS.require('Event')
+		, Style    = SpartanJS.require('Style')
+		, Type     = SpartanJS.require('Type')
+			// Local
+		, DeferredImage;
 
 	DeferredImage = function($img, options) {
 		if(this instanceof DeferredImage) {
@@ -63,4 +69,4 @@ var DeferredImage = (function(Event, Style, DomEvent) {
 
 	return DeferredImage;
 
-})(Event, Style, DomEvent);
+});

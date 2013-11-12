@@ -1,4 +1,4 @@
-var Domready = (function (ready) {
+SpartanJS.register('DomReady', function(SpartanJS, ready) {
 
 	"use strict";
 
@@ -53,4 +53,4 @@ var Domready = (function (ready) {
 			loaded ? fn() : fns.push(fn);
 		});
 
-})(document);
+});

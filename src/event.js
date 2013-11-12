@@ -1,13 +1,15 @@
-var Event = (function(Type) {
+SpartanJS.register('Event', function(SpartanJS) {
 
 	"use strict";
 
-	var slice = Array.prototype.slice;
+	var Type  = SpartanJS.require('Type')
+		, slice = Array.prototype.slice
+		, Event;
 
 	// Super Simple Event Handling
 	// ---------------------------
 
-	var Event = function() {
+	Event = function() {
 		if(!(this instanceof Event)) {
 			return new Event();
 		}
@@ -159,4 +161,4 @@ var Event = (function(Type) {
 
 	return Event;
 
-})(Type);
+});

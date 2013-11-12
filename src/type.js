@@ -1,5 +1,5 @@
 // Type Checking
-var Type =(function() {
+SpartanJS.register('Type', function() {
 
 	"use strict";
 
@@ -86,4 +86,4 @@ var Type =(function() {
 		}
 	};
 
-})();
+});

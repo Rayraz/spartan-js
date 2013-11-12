@@ -1,15 +1,18 @@
-/**
- * TODO: inertia
- */
-var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
+SpartanJS.register('Animation', function(SpartanJS) {
 
 	"use strict";
 
-  var cancelAnimationFrame, requestAnimationFrame, Animation;
-
-	// Local WindowAnimationTiming interface
-	cancelAnimationFrame  = WindowAnimationTiming.cancelAnimationFrame;
-	requestAnimationFrame = WindowAnimationTiming.requestAnimationFrame;
+	var // SpartanJS Components
+			Easing                = SpartanJS.require('EasingFunctions', true) || {}
+		, Event                 = SpartanJS.require('Event')
+		, Style                 = SpartanJS.require('Style')
+		, Type                  = SpartanJS.require('Type')
+		, WindowAnimationTiming = SpartanJS.require('WindowAnimationTiming')
+			// Local WindowAnimationTiming interface
+		, cancelAnimationFrame  = WindowAnimationTiming.cancelAnimationFrame
+		, requestAnimationFrame = WindowAnimationTiming.requestAnimationFrame
+			// Local
+		, Animation;
 
 	Animation = function(element) {
 		if(!Type.is('Element', element)) {
@@ -384,4 +387,4 @@ var Animation = (function(WindowAnimationTiming, Type, Style, Event, Easing) {
 
 	return Animation;
 
-})(WindowAnimationTiming, Type, Style, Event, 'undefined' != typeof EasingFunctions ? EasingFunctions : {});
+});

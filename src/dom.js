@@ -1,8 +1,10 @@
-var Dom = (function(Type, document) {
+SpartanJS.register('Dom', function(SpartanJS) {
 
 	"use strict";
 
-	var Dom = function(selector, scope) {
+	var Type = SpartanJS.require('Type');
+
+	return function(selector, scope) {
 		var _tempNid
 			, _find
 			, _onlyElements
@@ -83,6 +85,4 @@ var Dom = (function(Type, document) {
 		return _find(selector, scope);
 	};
 
-	return Dom;
-
-})(Type, document);
+});

@@ -1,4 +1,4 @@
-var Iterator = (function() {
+SpartanJS.register('Iterator', function() {
 
 	"use strict";
 
@@ -80,4 +80,4 @@ var Iterator = (function() {
 
 	return Iterator;
 
-})();
+});
