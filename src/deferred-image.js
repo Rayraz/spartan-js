@@ -36,10 +36,10 @@ SpartanJS.register('DeferredImage', function(SpartanJS) {
 			return this.loading;
 		},
 		load: function() {
-			var $img       = this.$img
+			var i, n
+				, $img       = this.$img
 				, options    = this.options
 				, attributes = ['id', 'class', 'alt', 'title', 'src']
-				, i
 				, attribute;
 
 			if(this.loaded) {
@@ -47,11 +47,9 @@ SpartanJS.register('DeferredImage', function(SpartanJS) {
 			}
 			else if(!this.loading) {
 				this.loading = true;
-				for(i in attributes) {
-					attribute = attributes[i];
-					if(options.hasOwnProperty(attribute)) {
-						$img[attribute] = options[attribute];
-					}
+				for(i = 0, n = attributes.length; i < n; i++) {
+					attribute       = attributes[i];
+					$img[attribute] = options[attribute];
 				}
 				if(options.style) {
 					Style.set($img, options.style);

@@ -10,7 +10,6 @@ SpartanJS.register('Iterator', function() {
 	};
 
 	Iterator = function(array, options) {
-		var i;
 		if(this instanceof Iterator) {
 			this._cursor = 0;
 			this.options = options || _defaults;
@@ -19,13 +18,13 @@ SpartanJS.register('Iterator', function() {
 		else {
 			return new Iterator(array);
 		}
-	}
+	};
 	Iterator.prototype = {
 		rewind: function() {
 			this._cursor = 0;
 		},
 		prev: function(options) {
-			var options = options || this.options;
+			options = options || this.options;
 
 			if(--this._cursor < 0) {
 				this._cursor = (options.circular) ? this.array.length-- : undefined;
@@ -36,7 +35,7 @@ SpartanJS.register('Iterator', function() {
 			return this.array[this._cursor];
 		},
 		next: function(options) {
-			var options = options || this.options;
+			options = options || this.options;
 
 			if(++this._cursor == this.array.length) {
 				this._cursor = (options.circular) ? 0 : undefined;

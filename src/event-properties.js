@@ -3,8 +3,8 @@ SpartanJS.register('EventProps', function(SpartanJS) {
 	"use strict";
 
 	var Type = SpartanJS.require('Type')
-  	, _bodyEl
-  	, _customHandlers;
+		, _bodyEl
+		, _customHandlers;
 
 	_bodyEl = document.body;
 
@@ -16,12 +16,12 @@ SpartanJS.register('EventProps', function(SpartanJS) {
 			return this._pointerCoordinates(event, pointers, 'Y');
 		},
 		_pointerCoordinates: function(event, pointers, axis) {
-			var i
+			var i, n
 				, properties = [];
 
 			pointers = (pointers === undefined) ? 0 : pointers;
 			if(Type.is('Array', pointers)) {
-				for(i in pointers) {
+				for(i = 0, n = pointers.length; i < n; i++) {
 					properties.push(this._pointerCoordinate(event, pointers[i], axis));
 				}
 				return properties;

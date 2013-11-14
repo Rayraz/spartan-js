@@ -7,7 +7,7 @@ SpartanJS.register('Uid', function() {
 	return function(prefix) {
 		prefix       = prefix || 'uid';
 		uids[prefix] = uids[prefix] || 0;
-		return prefix + '-' + ++uids[prefix];
+		return [prefix, ++uids[prefix]].join('-');
 	};
 
 });

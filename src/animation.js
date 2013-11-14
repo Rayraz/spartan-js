@@ -80,14 +80,15 @@ SpartanJS.register('Animation', function(SpartanJS) {
 		_parseAnimation: function(start, end, mode, options) {
 			var property
 				, properties = []
-				, start
 				, tween
 				, tweens    = 0
 				, animation = {};
 
 			// Which properties to animate
 			for(property in end) {
-				properties.push(property);
+				if(end.hasOwnProperty(property)) {
+					properties.push(property);
+				}
 			}
 
 			// Start state
@@ -95,9 +96,11 @@ SpartanJS.register('Animation', function(SpartanJS) {
 
 			// Create tweens for each property
 			for(property in end) {
-				tween = this._createTween(property, start[property], end[property], mode, options);
-				if(tween) {
-					++tweens; animation[property] = tween;
+				if(end.hasOwnProperty(property)) {
+					tween = this._createTween(property, start[property], end[property], mode, options);
+					if(tween) {
+						++tweens; animation[property] = tween;
+					}
 				}
 			}
 			return (tweens) ? animation : null;
@@ -138,13 +141,15 @@ SpartanJS.register('Animation', function(SpartanJS) {
 
 			// Set options.
 			for(param in this.defaults) {
-				tween[param] = (options[param] !== undefined) ? options[param] : this.defaults[param];
-				tween[param] = (end[param] !== undefined)     ? end[param]     : tween[param];
-				if(property.match(this._intProp)) {
-					tween.forceInt = true;
-				}
-				if(tween.decay > tween.duration) {
-					tween.decay = tween.duration;
+				if(this.defaults.hasOwnProperty(param)) {
+					tween[param] = (options[param] !== undefined) ? options[param] : this.defaults[param];
+					tween[param] = (end[param] !== undefined)     ? end[param]     : tween[param];
+					if(property.match(this._intProp)) {
+						tween.forceInt = true;
+					}
+					if(tween.decay > tween.duration) {
+						tween.decay = tween.duration;
+					}
 				}
 			}
 
@@ -163,7 +168,10 @@ SpartanJS.register('Animation', function(SpartanJS) {
 				, hasTweens = false;
 
 			for(tween in this._tweens) {
-				hasTweens = true; break;
+				if(this._tweens.hasOwnProperty(tween)) {
+					hasTweens = true;
+					break;
+				}
 			}
 			return hasTweens;
 		},
@@ -175,14 +183,16 @@ SpartanJS.register('Animation', function(SpartanJS) {
 				, action;
 
 			for(property in tweens) {
-				tween  = tweens[property];
-				action = 'new';
-				if(this._tweens[property]) {
-					action        = 'merge';
-					tween.inertia = this._tweens[property].inertia;
+				if(tweens.hasOwnProperty(property)) {
+					tween  = tweens[property];
+					action = 'new';
+					if(this._tweens[property]) {
+						action        = 'merge';
+						tween.inertia = this._tweens[property].inertia;
+					}
+					this._tweens[property] = tween;
+					this.events.trigger('tween:' + action, tween);
 				}
-				this._tweens[property] = tween;
-				this.events.trigger('tween:' + action, tween);
 			}
 		},
 
@@ -224,8 +234,7 @@ SpartanJS.register('Animation', function(SpartanJS) {
 		// --------------------------
 
 		_tick: function() {
-			var that = this
-				, style;
+			var that = this;
 
 			this._render();
 			this._loadNewAnimations();
@@ -240,52 +249,52 @@ SpartanJS.register('Animation', function(SpartanJS) {
 			}
 		},
 		_render: function() {
-			var property
+			var i, n
+				, property
 				, tween
 				, progress
-				, i
 				, value
-				, deltaX
-				, deltaT
 				, style           = {}
 				, hasStyles       = false
 				, remainingTweens = {};
 
 			for(property in this._tweens) {
+				if(this._tweens.hasOwnProperty(property)) {
 
-				// Get tween
-				tween             = this._tweens[property];
-				tween.prevTime    = tween.time || tween.startTime;
-				tween.time        = +new Date();
-				tween.prevVals    = tween.values || tween.start;
-				tween.values      = [];
-				tween.pervInertia = tween.inertia || new Array(tween.distance.length);
-				tween.inertia     = [];
+					// Get tween
+					tween             = this._tweens[property];
+					tween.prevTime    = tween.time || tween.startTime;
+					tween.time        = +new Date();
+					tween.prevVals    = tween.values || tween.start;
+					tween.values      = [];
+					tween.pervInertia = tween.inertia || new Array(tween.distance.length);
+					tween.inertia     = [];
 
-				// Calculate how far along the animation we currently are
-				progress = (tween.time - tween.startTime) / tween.duration;
-				progress = (progress > 1) ? 1 : progress;
-				progress = (Easing[tween.easing] && Type.is('Function', Easing[tween.easing])) ? Easing[tween.easing](progress) : progress;
+					// Calculate how far along the animation we currently are
+					progress = (tween.time - tween.startTime) / tween.duration;
+					progress = (progress > 1) ? 1 : progress;
+					progress = (Easing[tween.easing] && Type.is('Function', Easing[tween.easing])) ? Easing[tween.easing](progress) : progress;
 
-				// Iterate values
-				for(i = 0; i < tween.start.length; i++) {
+					// Iterate values
+					for(i = 0, n = tween.start.length; i < n; i++) {
 
-					// Calculate new values and inertia
-					value            = tween.start[i] + (tween.distance[i] * progress);
-					tween.values[i]  = tween.forceInt ? Math.round(value) : value;
-					tween.inertia[i] = ((tween.values[i] - tween.prevVals[i]) / (tween.time - tween.prevTime)) * 1000;
-				}
+						// Calculate new values and inertia
+						value            = tween.start[i] + (tween.distance[i] * progress);
+						tween.values[i]  = tween.forceInt ? Math.round(value) : value;
+						tween.inertia[i] = ((tween.values[i] - tween.prevVals[i]) / (tween.time - tween.prevTime)) * 1000;
+					}
 
-				// Generate new style
-				style[property] = this._outputProperty(tween.tpl, tween.values);
-				hasStyles       = true;
+					// Generate new style
+					style[property] = this._outputProperty(tween.tpl, tween.values);
+					hasStyles       = true;
 
-				// Animation not done yet? re-queue the tween.
-				if(tween.time - tween.startTime < tween.duration) {
-					remainingTweens[property] = tween;
-				}
-				else {
-					this.events.trigger('tween:done', tween);
+					// Animation not done yet? re-queue the tween.
+					if(tween.time - tween.startTime < tween.duration) {
+						remainingTweens[property] = tween;
+					}
+					else {
+						this.events.trigger('tween:done', tween);
+					}
 				}
 			}
 
@@ -327,55 +336,61 @@ SpartanJS.register('Animation', function(SpartanJS) {
 			return this;
 		},
 		stop: function(properties, finish) {
-			var property
-				, i
-				, animation
+			var i, n
+				, property
 				, tween;
 
 			// Interrupt animation loop
 			cancelAnimationFrame(this._frame);
 
+			// Stop individual properties
+			if(Type.is('Array', properties)) {
+				// Create [property,finish] tuples.
+				for(i = 0, n = properties.length; i < n; i++) {
+					property      = properties[i];
+					properties[i] = Type.is('Array', property) ? property: [property, finish];
+				}
+
+				// Stop tweens
+				for(i = 0, n = properties.length; n && i < n; i++) {
+					property = properties[i][0];
+					finish   = !!properties[i][1];
+					tween    = this._tweens[property];
+
+					// Fastforward tween
+					if(finish && tween) {
+						this._tweens[property].duration = 0;
+						this._tweens[property].decay    = 0;
+					}
+
+					// Stop tween in mid-animation
+					else if(tween) {
+						delete this._tweens[property];
+						this.event.trigger('tween:interrupted', tween);
+					}
+
+					// Remove queued tween
+					tween = this._newAnimations[property];
+					delete this._newAnimations[property];
+					this.event.trigger('tween:cancelled', tween);
+				}
+			}
+
 			// Stop all properties
-			if(Type.is('Boolean', properties)) {
-				finish     = properties;
+			else {
+				finish     = Type.is('Boolean', properties) ? properties : !!finish;
 				properties = [];
 				for(property in this._tweens) {
-					properties.push(property);
+					if(this._tweens.hasOwnProperty(property)) {
+						properties.push(property);
+					}
 				}
 				for(property in this._newAnimations) {
-					properties.push(property);
+					if(this._newAnimations.hasOwnProperty(property)) {
+						properties.push(property);
+					}
 				}
 				return this.stop(properties, finish);
-			}
-
-			// Create [property,finish] tuples.
-			for(i in properties) {
-				property      = properties[i];
-				properties[i] = Type.is('Array', property) ? property: [property, finish];
-			}
-
-			// Stop tweens
-			for(i in properties) {
-				property = properties[i][0];
-				finish   = properties[i][1];
-				tween    = this._tweens[property];
-
-				// Fastforward tween
-				if(finish && tween) {
-					this._tweens[property].duration = 0;
-					this._tweens[property].decay    = 0;
-				}
-
-				// Stop tween in mid-animation
-				else if(tween) {
-					delete this._tweens[property];
-					this.event.trigger('tween:interrupted', tween);
-				}
-
-				// Remove queued tween
-				tween = this._newAnimations[property];
-				delete this._newAnimations[property];
-				this.event.trigger('tween:cancelled', tween);
 			}
 
 			// Continue animation loop

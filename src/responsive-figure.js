@@ -11,50 +11,47 @@ SpartanJS.register('ResponsiveFigure', function(SpartanJS) {
 		, ResponsiveFigure;
 
 	ResponsiveFigure = function($figure, options) {
-		var i
-			, $img
+		var i, n, j, o
+			, $images
+			, $image
 			, queuedImage
-			, modes
-			, j
-			, mode;
+			, modes;
 
 		if(this instanceof ResponsiveFigure) {
 			this.$figure    = $figure;
-			this.$images    = Dom('img', $figure);
+			this.$images    = $images = Dom('img', $figure);
 			this.event      = new Event();
 			this.modes      = {};
 			this.activeMode = undefined;
 			this.queuedMode = undefined;
 
 			// Images
-			for(i in this.$images) {
-				$img        = this.$images[i];
-				queuedImage = new DeferredImage($img, options);
-				modes       = $img.getAttribute('data-responsive-modes').split(' ');
-				for(j in modes) {
+			for(i = 0, n = $images.length; i < n; i++) {
+				$image      = $images[i];
+				queuedImage = new DeferredImage($image, options);
+				modes       = $image.getAttribute('data-responsive-modes').split(' ');
+				for(j = 0, o = modes.length; j < o; j++) {
 					this.modes[modes[j]] = queuedImage;
 				}
 			}
 		}
 		else {
-			return new ResponsiveFigure($figure, viewport);
+			return new ResponsiveFigure($figure, options);
 		}
 	};
 	ResponsiveFigure.prototype = {
 		_checkMode: function(mode) {
 			if(!this.modes[mode]) {
-				throw Error("No image for mode 'mode' in ResponsiveFigure.");
+				throw Error("No image for mode '" + mode + "' in ResponsiveFigure.");
 			}
 		},
 		isLoaded: function(mode) {
-			var mode = mode || this.activeMode;
-
+			mode = mode || this.activeMode;
 			this._checkMode(mode);
 			return (mode) ? this.modes[mode].loaded : false;
 		},
 		isLoading: function(mode) {
-			var mode = mode || this.queuedMode;
-
+			mode = mode || this.queuedMode;
 			this._checkMode(mode);
 			return (mode) ? this.modes[mode].loading : false;
 		},
@@ -80,7 +77,7 @@ SpartanJS.register('ResponsiveFigure', function(SpartanJS) {
 			}
 		},
 		// This callback only triggers once, explicitly re-bind if needed.
-		onLoad: function(loadedImage) {
+		onLoad: function() {
 			var queuedMode = this.queuedMode
 				, activeMode = this.activeMode
 				, oldImage

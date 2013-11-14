@@ -11,16 +11,15 @@ SpartanJS.register('Dom', function(SpartanJS) {
 			, _qsa;
 
 		// Temporary nid, used for scoping
-		_tempNid = 'Dom'+ -(new Date()),
+		_tempNid = 'Dom'+ -(new Date());
 
 		// Run selector for each element in scope
 		_find = function(selector, scope) {
 			if(!Type.is('String', selector)) {
 				return [];
 			}
-			var i
+			var i, n, j
 				, nodeList
-				, j
 				, results = [];
 
 			scope = Type.is('Array', scope) ? scope : [scope];
@@ -28,30 +27,30 @@ SpartanJS.register('Dom', function(SpartanJS) {
 			scope = scope.length ? scope : [undefined];
 
 			// search
-			for(i = 0; i < scope.length; i++) {
+			for(i = 0, n = scope.length; i < n; i++) {
 				nodeList = _qsa(selector, scope[i]);
 				for(j = nodeList.length; j--; results.unshift(nodeList[j]));
 			}
 			return results;
-		},
+		};
 
 		// Removes any non-elements from the set
 		_onlyElements = function(set) {
-			var i
+			var i, n
 				, elements = [];
 
 			// Ensure array
 			set = Type.is('Array', set) ? set : [set];
 
 			// Filter elements
-			for(i = 0; i < set.length; i++) {
+			for(i = 0, n = set.length; i < n; i++) {
 				if(Type.is('Element', set[i])) {
 					elements.push(set[i]);
 				}
 			}
 
 			return elements;
-		},
+		};
 
 		// Find elements within optional scope using querySelectorAll
 		_qsa = function(selector, scope) {
@@ -79,7 +78,7 @@ SpartanJS.register('Dom', function(SpartanJS) {
 			}
 
 			return results;
-		}
+		};
 
 		// Do the stuff!
 		return _find(selector, scope);

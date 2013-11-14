@@ -43,7 +43,7 @@ SpartanJS.register('DomReady', function(SpartanJS, ready) {
 						testEl.doScroll('left');
 					} catch (e) {
 						return setTimeout(function() {
-							ready(fn)
+							ready(fn);
 						}, 50);
 					}
 					fn();

@@ -1,9 +1,8 @@
-SpartanJS.register('Fun', function(SpartanJS) {
+SpartanJS.register('Fun', function() {
 
 	"use strict";
 
-	var Type = SpartanJS.require('Type')
-		, Debouncer
+	var Debouncer
 		, Memoizer;
 
 	Debouncer = function(delay, fun, ctx, args) {
@@ -36,15 +35,15 @@ SpartanJS.register('Fun', function(SpartanJS) {
 		}
 	};
 
-	Memoizer = function(ffun, ctx, args) {
+	Memoizer = function(fun, ctx, args) {
 		if(this instanceof Memoizer) {
 			this.reset.apply(this, arguments);
 			return this;
 		}
 		else {
-			return new Memoizer(ffun, ctx, args);
+			return new Memoizer(fun, ctx, args);
 		}
-	}
+	};
 	Memoizer.prototype = {
 		reply: function() {
 			if(!this._memoized) {
@@ -53,7 +52,7 @@ SpartanJS.register('Fun', function(SpartanJS) {
 			}
 			return this._cache;
 		},
-		reset: function(ffun, ctx, args) {
+		reset: function(fun, ctx, args) {
 			if(arguments.length) {
 				this._memoized = false;
 				this._cache    = undefined;

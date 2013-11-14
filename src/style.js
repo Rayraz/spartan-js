@@ -25,10 +25,10 @@ SpartanJS.register('Style', function(SpartanJS) {
 	// This function generates a mapping of unprefixed css properties to their
 	// vendor-prefixed counterparts as declared in the CSSStyleDeclaration object.
 	_prefixMap = (function(docEl) {
-		var prefixes
+		var i, n
+			, prefixes
 			, styles
 			, property
-			, i
 			, prefix
 			, unprefixed
 			, map = [];
@@ -38,20 +38,22 @@ SpartanJS.register('Style', function(SpartanJS) {
 		// TODO: IE Test
 		styles   = window.currentStyle || window.getComputedStyle(docEl, '');
 		for(property in styles) {
-			for(i in prefixes) {
-				prefix = prefixes[i];
-				if(property != 'length' && property.match(/[a-zA-Z]/)) {
-					if(property.indexOf(prefix) === 0) {
-						unprefixed      = property.substring(prefix.length, property.length);
-						unprefixed      = unprefixed.charAt(0).toLowerCase() + unprefixed.slice(1);
-						map[unprefixed] = property;
-						break;
-					}
-					else {
-						map[property] = property;
-					}
+			if(styles.hasOwnProperty(property)) {
+				for(i = 0, n = prefixes.length; i < n; i++) {
+					prefix = prefixes[i];
+					if(property != 'length' && property.match(/[a-zA-Z]/)) {
+						if(property.indexOf(prefix) === 0) {
+							unprefixed      = property.substring(prefix.length, property.length);
+							unprefixed      = unprefixed.charAt(0).toLowerCase() + unprefixed.slice(1);
+							map[unprefixed] = property;
+							break;
+						}
+						else {
+							map[property] = property;
+						}
+					} // prefixes
 				}
-			}
+			} // styles
 		}
 		return map;
 	})(docEl);
@@ -197,21 +199,20 @@ SpartanJS.register('Style', function(SpartanJS) {
 
 	// Default style getter
 	_getProperty = function(node, property) {
-		var _getPrefixedStyle
-			, computed
+		var computed
 			, value;
 
 		if(!node.currentStyle) {
 			computed = document.defaultView.getComputedStyle(node, "");
-			value    =  computed.getPropertyValue(property) /* IE9 with css filters */
-							 || computed[_prefixMap[property]];
+			value    = computed.getPropertyValue(property) /* IE9 with css filters */
+				|| computed[_prefixMap[property]];
 		}
 		else { // IE<=8
 			value = node.currentStyle[property];
 		}
 		return _pixelPropertyRegexp.test(property)
-				 ? _getPixelValue(node, value)
-				 : value;
+			? _getPixelValue(node, value)
+			: value;
 	};
 
 	// Default style setter
@@ -241,20 +242,20 @@ SpartanJS.register('Style', function(SpartanJS) {
 			if(!Type.is('Element', node)) {
 				return {};
 			}
-			var i
+			var i, n
 				, styles = {}
 				, style
 				, asArray = Type.is('Array', properties);
 
 			properties = asArray ? properties : [properties];
 
-			for(i = 0; i < properties.length; i++) {
+			for(i = 0, n = properties.length; i < n; i++) {
 				style = _customHandlers.get[properties[i]]
-							? _customHandlers.get[properties[i]](node)
-							: _getProperty(node, properties[i]);
+					? _customHandlers.get[properties[i]](node)
+					: _getProperty(node, properties[i]);
 				styles[properties[i]] = (unitless)
-															? parseFloat(("" + style).replace(_nonDigitRegexp))
-															: style;
+					? parseFloat(("" + style).replace(_nonDigitRegexp))
+					: style;
 			}
 
 			return (asArray) ? styles : styles[properties[--i]];

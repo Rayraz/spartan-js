@@ -7,6 +7,9 @@ SpartanJS.register('Type', function() {
 	// ----------
 
 	var _tests = {
+		wildcard: function(obj, type) {
+			return Object.prototype.toString.call(obj) == '[object ' + type + ']';
+		},
 		isElement: function(obj) {
 			return !!(obj && obj.nodeType === 1);
 		},
@@ -14,7 +17,7 @@ SpartanJS.register('Type', function() {
 			return isFinite(obj) && !isNaN(parseFloat(obj));
 		},
 		isNaN: function(obj) {
-			return isNumber(obj) && obj != +obj;
+			return _tests.wildcard(obj, 'Number') && obj != +obj;
 		},
 		isBoolean: function(obj) {
 			return obj === true || obj === false || Object.prototype.toString.call(obj) == '[object Boolean]';
@@ -29,10 +32,7 @@ SpartanJS.register('Type', function() {
 			return obj && typeof obj === "object";
 		},
 		isWindow: function(obj) {
-			return this.isObject(obj) && "setInterval" in obj && obj.self === obj;
-		},
-		wildcard: function(obj, type) {
-			return Object.prototype.toString.call(obj) == '[object ' + type + ']';
+			return _tests.isObject(obj) && "setInterval" in obj && obj.self === obj;
 		}
 	};
 
@@ -53,14 +53,16 @@ SpartanJS.register('Type', function() {
 	}
 
 	_tests.isEmpty = function(obj) {
-		if(obj == null) {
+		if(obj === null) {
 			return true;
 		}
 		if(_tests.isArray(obj) || _tests.isString(obj)) {
 			return obj.length === 0;
 		}
-		for(var key in obj) if(obj.hasOwnProperty(key)) {
-			return false;
+		for(var key in obj) {
+			if(obj.hasOwnProperty(key)) {
+				return false;
+			}
 		}
 		return true;
 	};
@@ -70,12 +72,12 @@ SpartanJS.register('Type', function() {
 
 	return {
 		is: function(types, value) {
-			var i
+			var i, n
 				, type
 				, test;
 
 			types = _tests.isArray(types) ? types : [types];
-			for(i in types) {
+			for(i = 0, n = types.length; i < n; i++) {
 				type = types[i];
 				test = _tests.hasOwnProperty('is' + type) ? _tests['is' + type] : _tests.wildcard;
 				if(test.call(_tests, value, type)) {

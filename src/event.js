@@ -20,8 +20,8 @@ SpartanJS.register('Event', function(SpartanJS) {
 
 	Event.prototype = {
 		trigger: function(type, event /* polymorphic */) {
-			var listeners = []
-				, i
+			var i, n
+				, listeners = []
 				, listener;
 
 			// Listeners for event, listeners for wildcard
@@ -33,7 +33,7 @@ SpartanJS.register('Event', function(SpartanJS) {
 			}
 
 			// Trigger callbacks
-			for(i = 0; i < listeners.length; i++) {
+			for(i = 0, n = listeners.length; i < n; i++) {
 				// Allow interrupting the callback loop.
 				if(event && event.isImmediatePropagationStopped && event.isImmediatePropagationStopped()) {
 					break;
@@ -46,9 +46,8 @@ SpartanJS.register('Event', function(SpartanJS) {
 			}
 		},
 		on: function(types, listeners, context) {
-			var type
-				, i
-				, j
+			var i, n, j, o
+				, type
 				, registered
 				, match
 				, listener;
@@ -69,13 +68,17 @@ SpartanJS.register('Event', function(SpartanJS) {
 				registered = this._listeners[type] || [];
 				listeners  = Type.is('Array', listeners) ? listeners : [listeners];
 
-				for(i in listeners) {
+				for(i = 0, n = listeners.length; i < n; i++) {
 					match    = false;
 					listener = listeners[i];
 					listener = Type.is('Array', listener) ? listener : [listener, context];
 
+					if(!Type.is('Function', listener[0])) {
+						throw Error('Event listener must be a function');
+					}
+
 					// Already registered?
-					for(j in registered) {
+					for(j = 0, o = registered.length; j < o; i++) {
 						match = registered[j] === listener;
 						break;
 					}
@@ -91,11 +94,11 @@ SpartanJS.register('Event', function(SpartanJS) {
 			this._listeners[type] = registered;
 		},
 		off: function(types, listeners, context) {
-			var type
-				, i
+			var i, n, j, o
+				, type
 				, registered
 				, listener
-				, index;
+				, filtered = [];
 
 			// No types defined: Remove listeners for all types
 			if(types === undefined) {
@@ -127,21 +130,21 @@ SpartanJS.register('Event', function(SpartanJS) {
 
 				// Remove specific listeners
 				listeners = Type.is('Array', listeners) ? listeners : [listeners];
-				for(i in listeners) {
+				for(i = 0, n = listeners.length; i < n; i++) {
 					listener = listeners[i];
 					listener = Type.is('Array', listener) ? listener : [listener, context];
-					for(index in registered) {
-						if(registered[index][0] == listener[0] && registered[index][1] == listener[1]) {
-							registered.splice(index, 1);
+					for(j = 0, o = registered.length; o && j < o; j++) {
+						if(registered[j] != listener) {
+							filtered.push(registered[j]);
 						}
 					}
 				}
-				this._listeners[type] = registered;
+				this._listeners[type] = filtered;
 			}
 		},
 		hasListeners: function(type) {
-			var listeners
-				, i
+			var i, n
+				, listeners
 				, numListeners = 0;
 
 			if(type !== undefined) {
@@ -149,10 +152,8 @@ SpartanJS.register('Event', function(SpartanJS) {
 				return listeners ? !!listeners.length : false;
 			}
 			else {
-				for(i in listeners) {
-					if(listeners.hasOwnProperty(i)) {
-						numListeners += listeners[i].length;
-					}
+				for(i = 0, n = listeners.length; n && i < n; i++) {
+					numListeners += listeners[i].length;
 				}
 			}
 			return !!numListeners;

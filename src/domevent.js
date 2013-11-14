@@ -95,7 +95,7 @@ SpartanJS.register('DomEvent', function(SpartanJS) {
 				EnhancedEvent.prototype[i] = function() {
 					var e = this.originalEvent;
 					return e[i].apply(e, arguments);
-				}
+				};
 			}
 			else {
 				EnhancedEvent.prototype[i] = event[i];
@@ -144,15 +144,16 @@ SpartanJS.register('DomEvent', function(SpartanJS) {
 	};
 	_eventTypeCache = {};
 	_eventType      = function(type) {
-		var i
-			, candidate;
+		var i, n
+			, candidate
+			, eventMap = _eventMap[type];
 
-		if(!_eventMap[type]) {
+		if(!eventMap) {
 			return type;
 		}
 		if(!_eventTypeCache[type]) {
-			for(i in _eventMap[type]) {
-				candidate = _eventMap[type][i];
+			for(i = 0, n = eventMap.length; i < n; i++) {
+				candidate = eventMap[i];
 				if(_isEventSupported(candidate)) {
 					_eventTypeCache[type] = candidate;
 					break;
@@ -181,7 +182,9 @@ SpartanJS.register('DomEvent', function(SpartanJS) {
 		event.initEvent('dataavailable', bubble, true);
 
 		for(property in properties) {
-			event[property] = properties[property];
+			if(properties.hasOwnProperty(property)) {
+				event[property] = properties[property];
+			}
 		}
 		event.eventName = type;
 
@@ -196,7 +199,9 @@ SpartanJS.register('DomEvent', function(SpartanJS) {
 		event.eventType = bubble ? 'ondataavailable' : 'onlosecapture';
 
 		for(property in properties) {
-			event[property] = properties[property];
+			if(properties.hasOwnProperty(property)) {
+				event[property] = properties[property];
+			}
 		}
 		event.eventName = type;
 
@@ -217,10 +222,10 @@ SpartanJS.register('DomEvent', function(SpartanJS) {
 	//   matching the selector.
 	_delegateForwarder = function(delegator, selector, trigger) {
 		var isDelegate = function(candidate, selector, delegator) {
-			var i
+			var i, n
 				, delegates = Dom(selector, delegator);
 
-			for(i in delegates) {
+			for(i = 0, n = delegates.length; i < n; i++) {
 				if(delegates[i] === candidate) {
 					return true;
 				}

@@ -6,9 +6,8 @@ SpartanJS.register('Obj', function(SpartanJS) {
 
 	return {
 		extend: function(object, /* polymorphic, */ recursive) {
-			var sources
-				, i
-				, n
+			var i, n
+				, sources
 				, source
 				, property;
 
@@ -22,14 +21,16 @@ SpartanJS.register('Obj', function(SpartanJS) {
 			for(i = 0, n = sources.length; i < n; i++) {
 				source = sources[i];
 				for(property in source) {
-					if(object[property] && Type.is('Object', object[property]) && recursive) {
-						object[property] = this.extend.call(this, object[property], source[property], recursive);
+					if(source.hasOwnProperty(property)) {
+						if(object[property] && Type.is('Object', object[property]) && recursive) {
+							object[property] = this.extend.call(this, object[property], source[property], recursive);
+						}
+						else {
+							object[property] = source[property];
+						}
 					}
-					else {
-						object[property] = source[property];
-					}
-				}
-			}
+				} // properties
+			} // sources
 			return object;
 		},
 		keys: function(object) {
@@ -37,7 +38,9 @@ SpartanJS.register('Obj', function(SpartanJS) {
 				, i;
 
 			for(i in object) {
-				result.push(i);
+				if(object.hasOwnProperty(i)) {
+					result.push(i);
+				}
 			}
 
 			return result;
@@ -47,7 +50,9 @@ SpartanJS.register('Obj', function(SpartanJS) {
 				, i;
 
 			for(i in object) {
-				result.push(object[i]);
+				if(object.hasOwnProperty(i)) {
+					result.push(object[i]);
+				}
 			}
 
 			return result;
