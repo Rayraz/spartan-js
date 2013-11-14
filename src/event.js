@@ -94,6 +94,9 @@ SpartanJS.register('Event', function(SpartanJS) {
 			this._listeners[type] = registered;
 		},
 		off: function(types, listeners, context) {
+			if(types == 'mousemove' || types == 'mouseup') {
+				console.log(types, listeners, context);
+			}
 			var i, n, j, o
 				, type
 				, registered
@@ -124,7 +127,7 @@ SpartanJS.register('Event', function(SpartanJS) {
 				registered = this._listeners[type];
 
 				// No existing listeners, nothing to do
-				if(registered === undefined) {
+				if(!registered || !registered.length) {
 					return;
 				}
 
@@ -133,8 +136,9 @@ SpartanJS.register('Event', function(SpartanJS) {
 				for(i = 0, n = listeners.length; i < n; i++) {
 					listener = listeners[i];
 					listener = Type.is('Array', listener) ? listener : [listener, context];
-					for(j = 0, o = registered.length; o && j < o; j++) {
-						if(registered[j] != listener) {
+					for(j = 0, o = registered.length; j < o; j++) {
+						if(registered[j][0] != listener[0]
+							&& registered[j][1] != listener[1]) {
 							filtered.push(registered[j]);
 						}
 					}
