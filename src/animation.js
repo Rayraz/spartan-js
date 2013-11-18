@@ -60,19 +60,15 @@ SpartanJS.register('Animation', function(SpartanJS) {
 		// Implementation > Animations
 		// ---------------------------
 
-		// Load a new animation and merge it into the tweens list.
-		_loadNewAnimations: function() {
-			var animation
-				, isNew;
+		// parse a new animation and merge it into the tweens list.
+		_addAnimation: function(animation) {
+			var isNew;
 
-			while(this._newAnimations.length) {
-				animation = this._newAnimations.shift();
-				animation = this._parseAnimation.apply(this, animation);
-				if(animation) {
-					isNew = this._hasTweens();
-					this._mergeTweens(animation);
-					this.events.trigger('animation:' + (isNew ? 'new' : 'merge'), animation);
-				}
+			animation = this._parseAnimation.apply(this, animation);
+			if(animation) {
+				isNew = this._hasTweens();
+				this._mergeTweens(animation);
+				this.events.trigger('animation:' + (isNew ? 'new' : 'merge'), animation);
 			}
 		},
 
@@ -237,7 +233,6 @@ SpartanJS.register('Animation', function(SpartanJS) {
 			var that = this;
 
 			this._render();
-			this._loadNewAnimations();
 			if(this._hasTweens()) {
 				requestAnimationFrame(function() {
 					that._tick();
@@ -314,7 +309,7 @@ SpartanJS.register('Animation', function(SpartanJS) {
 		tween: function(to, options) {
 			var that = this;
 
-			this._newAnimations.push([null, to, 'tween', options]);
+			this._addAnimation([null, to, 'tween', options]);
 			if(!this._frame) {
 				this._frame = requestAnimationFrame(function() {
 					that._tick();
@@ -326,7 +321,7 @@ SpartanJS.register('Animation', function(SpartanJS) {
 		transform: function(transformation, options) {
 			var that = this;
 
-			this._newAnimations.push([null, transformation, 'transform', options]);
+			this._addAnimation([null, transformation, 'transform', options]);
 			if(!this._frame) {
 				this._frame = requestAnimationFrame(function() {
 					that._tick();
