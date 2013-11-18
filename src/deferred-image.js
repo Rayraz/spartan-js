@@ -10,18 +10,15 @@ SpartanJS.register('DeferredImage', function(SpartanJS) {
 			// Local
 		, DeferredImage;
 
-	DeferredImage = function($img, options) {
+	DeferredImage = function($img, src) {
 		if(this instanceof DeferredImage) {
-			this.options = options || {};
-			// Image src from data-attribute
-			if(!this.options.src && Type.is('Element', $img)) {
-				this.options.src = $img.getAttribute('data-src');
-			}
 			this.event   = new Event();
-			this.$img    = $img || new Image();
+			this.$img    = $img;
+			this.src     = src || $img.getAttribute('data-src');
 			this.loaded  = false;
 			this.loading = false;
-			DomEvent.on(this.$img, 'load', this.onLoad, this);
+			this.img     = new Image();
+			DomEvent.on(this.img, 'load', this.onLoad, this);
 			return this;
 		}
 		else {
@@ -36,31 +33,19 @@ SpartanJS.register('DeferredImage', function(SpartanJS) {
 			return this.loading;
 		},
 		load: function() {
-			var i, n
-				, $img       = this.$img
-				, options    = this.options
-				, attributes = ['id', 'class', 'alt', 'title', 'src']
-				, attribute;
-
 			if(this.loaded) {
 				this.onLoad();
 			}
 			else if(!this.loading) {
 				this.loading = true;
-				for(i = 0, n = attributes.length; i < n; i++) {
-					attribute       = attributes[i];
-					$img[attribute] = options[attribute];
-				}
-				if(options.style) {
-					Style.set($img, options.style);
-				}
-			}
-			else {
+				this.img.src = this.src;
 			}
 		},
 		onLoad: function() {
-			this.loading = false;
-			this.loaded  = true;
+			this.loading  = false;
+			this.loaded   = true;
+			this.$img.src = this.src;
+			Style.set(this.$img, { width: this.img.width, height: this.img.height });
 			this.event.trigger('loaded', this);
 		}
 	};
