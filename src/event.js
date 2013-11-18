@@ -94,9 +94,6 @@ SpartanJS.register('Event', function(SpartanJS) {
 			this._listeners[type] = registered;
 		},
 		off: function(types, listeners, context) {
-			if(types == 'mousemove' || types == 'mouseup') {
-				console.log(types, listeners, context);
-			}
 			var i, n, j, o
 				, type
 				, registered
