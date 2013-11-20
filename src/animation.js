@@ -95,7 +95,8 @@ SpartanJS.register('Animation', function(SpartanJS) {
 				if(end.hasOwnProperty(property)) {
 					tween = this._createTween(property, start[property], end[property], mode, options);
 					if(tween) {
-						++tweens; animation[property] = tween;
+						++tweens;
+						animation[property] = tween;
 					}
 				}
 			}
@@ -125,7 +126,7 @@ SpartanJS.register('Animation', function(SpartanJS) {
 			tween.tpl = tween.tpl || start.tpl || end.tpl;
 
 			// Set start values
-			tween.start     = start.values;
+			tween.start = start.values;
 
 			// Set distance of each transformation
 			if(mode == 'transform') {
@@ -221,6 +222,7 @@ SpartanJS.register('Animation', function(SpartanJS) {
 
 		// Insert values into css properties
 		_outputProperty: function(tpl, values) {
+			console.log(tpl, values);
 			return tpl.replace(this._placeholderRegexp, function(match, i) {
 				return values[i] !== undefined ? values[i] : match;
 			});

@@ -1,25 +1,25 @@
-SpartanJS.register('Iterator', function() {
+SpartanJS.register('ArrayIterator', function() {
 
 	"use strict";
 
 	var _defaults
-		, Iterator;
+		, ArrayIterator;
 
 	_defaults = {
 		circular: false
 	};
 
-	Iterator = function(array, options) {
-		if(this instanceof Iterator) {
+	ArrayIterator = function(array, options) {
+		if(this instanceof ArrayIterator) {
 			this._cursor = 0;
 			this.options = options || _defaults;
 			this.array   = array;
 		}
 		else {
-			return new Iterator(array);
+			return new ArrayIterator(array);
 		}
 	};
-	Iterator.prototype = {
+	ArrayIterator.prototype = {
 		rewind: function() {
 			this._cursor = 0;
 		},
@@ -27,7 +27,7 @@ SpartanJS.register('Iterator', function() {
 			options = options || this.options;
 
 			if(--this._cursor < 0) {
-				this._cursor = (options.circular) ? this.array.length-- : undefined;
+				this._cursor = (options.circular) ? this.array.length - 1 : undefined;
 			}
 			return this.current();
 		},
@@ -77,6 +77,6 @@ SpartanJS.register('Iterator', function() {
 		}
 	};
 
-	return Iterator;
+	return ArrayIterator;
 
 });

@@ -6,7 +6,6 @@ SpartanJS.register('DeferredImage', function(SpartanJS) {
 			DomEvent = SpartanJS.require('DomEvent')
 		, Event    = SpartanJS.require('Event')
 		, Style    = SpartanJS.require('Style')
-		, Type     = SpartanJS.require('Type')
 			// Local
 		, DeferredImage;
 
@@ -18,11 +17,11 @@ SpartanJS.register('DeferredImage', function(SpartanJS) {
 			this.loaded  = false;
 			this.loading = false;
 			this.img     = new Image();
-			DomEvent.on(this.img, 'load', this.onLoad, this);
+			DomEvent.on(this.img, 'load', this._onLoad, this);
 			return this;
 		}
 		else {
-			return new DeferredImage(options);
+			return new DeferredImage($img, src);
 		}
 	};
 	DeferredImage.prototype = {
@@ -34,14 +33,14 @@ SpartanJS.register('DeferredImage', function(SpartanJS) {
 		},
 		load: function() {
 			if(this.loaded) {
-				this.onLoad();
+				this._onLoad();
 			}
 			else if(!this.loading) {
 				this.loading = true;
 				this.img.src = this.src;
 			}
 		},
-		onLoad: function() {
+		_onLoad: function() {
 			this.loading  = false;
 			this.loaded   = true;
 			this.$img.src = this.src;

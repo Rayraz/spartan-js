@@ -220,7 +220,7 @@ SpartanJS.register('DomEvent', function(SpartanJS) {
 	// - event.target is a child of the delegator node
 	// - event.target matches the provided selector ór is a child of a node
 	//   matching the selector.
-	_delegateForwarder = function(delegator, selector, trigger) {
+	_delegateForwarder = function(delegator, selector) {
 		var isDelegate = function(candidate, selector, delegator) {
 			var i, n
 				, delegates = Dom(selector, delegator);

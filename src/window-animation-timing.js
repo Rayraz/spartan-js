@@ -6,12 +6,8 @@ SpartanJS.register('WindowAnimationTiming', function() {
 		, requestAnimationFrame;
 
 	// Local WindowAnimationTiming interface
-	/**
-	 * Temporarily always use polyfill
-	 */
 	cancelAnimationFrame  = window.cancelAnimationFrame || window.cancelRequestAnimationFrame;
 	requestAnimationFrame = window.requestAnimationFrame;
-	/**/
 
 	// Local WindowAnimationTiming interface polyfill
 	(function (window) {
