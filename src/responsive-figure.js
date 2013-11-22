@@ -40,6 +40,14 @@ SpartanJS.register('ResponsiveFigure', function(SpartanJS) {
 		}
 	};
 	ResponsiveFigure.prototype = {
+		getDimensions: function() {
+			var img = this.modes[this.activeMode].img;
+
+			return {
+				width: img.width,
+				height: img.height
+			};
+		},
 		_checkMode: function(mode) {
 			if(!this.modes[mode]) {
 				throw Error("No image for mode '" + mode + "' in ResponsiveFigure.");

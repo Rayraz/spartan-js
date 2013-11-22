@@ -44,7 +44,8 @@ SpartanJS.register('DeferredImage', function(SpartanJS) {
 			this.loading  = false;
 			this.loaded   = true;
 			this.$img.src = this.src;
-			Style.set(this.$img, { width: this.img.width, height: this.img.height });
+			this.$img.setAttribute('data-width', this.img.width);
+			this.$img.setAttribute('data-height', this.img.height);
 			this.event.trigger('loaded', this);
 		}
 	};
