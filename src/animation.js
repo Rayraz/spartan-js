@@ -4,7 +4,7 @@ SpartanJS.register('Animation', function(SpartanJS) {
 
 	var // SpartanJS Components
 			Easing                = SpartanJS.require('EasingFunctions', true) || {}
-		, Event                 = SpartanJS.require('Event')
+		, Events                = SpartanJS.require('Events')
 		, Style                 = SpartanJS.require('Style')
 		, Type                  = SpartanJS.require('Type')
 		, WindowAnimationTiming = SpartanJS.require('WindowAnimationTiming')
@@ -19,8 +19,8 @@ SpartanJS.register('Animation', function(SpartanJS) {
 			return;
 		}
 		if(this instanceof Animation) {
-			if(!this.events || !(this.events instanceof Event)) {
-				this.events = new Event();
+			if(!this.events || !(this.events instanceof Events)) {
+				this.events = new Events();
 			}
 			this.element        = element;
 			this._tweens        = {};
@@ -222,7 +222,6 @@ SpartanJS.register('Animation', function(SpartanJS) {
 
 		// Insert values into css properties
 		_outputProperty: function(tpl, values) {
-			console.log(tpl, values);
 			return tpl.replace(this._placeholderRegexp, function(match, i) {
 				return values[i] !== undefined ? values[i] : match;
 			});
@@ -363,13 +362,13 @@ SpartanJS.register('Animation', function(SpartanJS) {
 					// Stop tween in mid-animation
 					else if(tween) {
 						delete this._tweens[property];
-						this.event.trigger('tween:interrupted', tween);
+						this.events.trigger('tween:interrupted', tween);
 					}
 
 					// Remove queued tween
 					tween = this._newAnimations[property];
 					delete this._newAnimations[property];
-					this.event.trigger('tween:cancelled', tween);
+					this.events.trigger('tween:cancelled', tween);
 				}
 			}
 

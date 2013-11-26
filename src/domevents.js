@@ -1,12 +1,12 @@
-SpartanJS.register('DomEvent', function(SpartanJS) {
+SpartanJS.register('DomEvents', function(SpartanJS) {
 
 	"use strict";
 
 	var // SpartanJS Components
-			Dom   = SpartanJS.require('Dom')
-		, Event = SpartanJS.require('Event')
-		, Type  = SpartanJS.require('Type')
-		, Uid   = SpartanJS.require('Uid')
+			Dom    = SpartanJS.require('Dom')
+		, Events = SpartanJS.require('Events')
+		, Type   = SpartanJS.require('Type')
+		, Uid    = SpartanJS.require('Uid')
 			// Local
 		, _fixEvent
 		, _eventTags
@@ -312,8 +312,8 @@ SpartanJS.register('DomEvent', function(SpartanJS) {
 				}
 
 				// Make sure the element has an event handler
-				if(!element.events || !(element.events instanceof Event)) {
-					element.events = new Event();
+				if(!element.events || !(element.events instanceof Events)) {
+					element.events = new Events();
 				}
 				handler     = element.events;
 				firstOfType = !handler.hasListeners(trigger);

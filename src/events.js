@@ -1,24 +1,24 @@
-SpartanJS.register('Event', function(SpartanJS) {
+SpartanJS.register('Events', function(SpartanJS) {
 
 	"use strict";
 
 	var Type  = SpartanJS.require('Type')
 		, slice = Array.prototype.slice
-		, Event;
+		, Events;
 
 	// Super Simple Event Handling
 	// ---------------------------
 
-	Event = function() {
-		if(!(this instanceof Event)) {
-			return new Event();
+	Events = function() {
+		if(!(this instanceof Events)) {
+			return new Events();
 		}
 		else {
 			this._listeners = {};
 		}
 	};
 
-	Event.prototype = {
+	Events.prototype = {
 		trigger: function(type, event /* polymorphic */) {
 			var i, n
 				, listeners = []
@@ -161,6 +161,6 @@ SpartanJS.register('Event', function(SpartanJS) {
 		}
 	};
 
-	return Event;
+	return Events;
 
 });

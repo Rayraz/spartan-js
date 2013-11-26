@@ -5,7 +5,7 @@ SpartanJS.register('ResponsiveFigure', function(SpartanJS) {
 	var // SpartanJS Components
 			Dom           = SpartanJS.require('Dom')
 		, DeferredImage = SpartanJS.require('DeferredImage')
-		, Event         = SpartanJS.require('Event')
+		, Events        = SpartanJS.require('Events')
 		, Style         = SpartanJS.require('Style')
 			// Local
 		, ResponsiveFigure;
@@ -20,7 +20,7 @@ SpartanJS.register('ResponsiveFigure', function(SpartanJS) {
 		if(this instanceof ResponsiveFigure) {
 			this.$figure    = $figure;
 			this.$images    = $images = Dom('img', $figure);
-			this.event      = new Event();
+			this.events     = new Events();
 			this.modes      = {};
 			this.activeMode = undefined;
 			this.queuedMode = undefined;
@@ -78,7 +78,7 @@ SpartanJS.register('ResponsiveFigure', function(SpartanJS) {
 			// New image, load it.
 			else {
 				this.queuedMode = mode;
-				queuedImage.event.on('loaded', this._onLoad, this);
+				queuedImage.events.on('loaded', this._onLoad, this);
 				queuedImage.load();
 			}
 		},
@@ -91,7 +91,7 @@ SpartanJS.register('ResponsiveFigure', function(SpartanJS) {
 
 			if(queuedMode) {
 				newImage = this.modes[queuedMode];
-				newImage.event.off('loaded', this._onLoad, this);
+				newImage.events.off('loaded', this._onLoad, this);
 				Style.set(newImage.$img, { display: 'block' });
 				if(activeMode) {
 					oldImage = this.modes[activeMode];
@@ -100,7 +100,7 @@ SpartanJS.register('ResponsiveFigure', function(SpartanJS) {
 				this.activeMode = queuedMode;
 				this.queuedMode = undefined;
 			}
-			this.event.trigger('loaded', this);
+			this.events.trigger('loaded', this);
 		}
 	};
 

@@ -3,21 +3,20 @@ SpartanJS.register('DeferredImage', function(SpartanJS) {
 	"use strict";
 
 	var // SpartanJS Components
-			DomEvent = SpartanJS.require('DomEvent')
-		, Event    = SpartanJS.require('Event')
-		, Style    = SpartanJS.require('Style')
+			DomEvents = SpartanJS.require('DomEvents')
+		, Events    = SpartanJS.require('Events')
 			// Local
 		, DeferredImage;
 
 	DeferredImage = function($img, src) {
 		if(this instanceof DeferredImage) {
-			this.event   = new Event();
+			this.events  = new Events();
 			this.$img    = $img;
 			this.src     = src || $img.getAttribute('data-src');
 			this.loaded  = false;
 			this.loading = false;
 			this.img     = new Image();
-			DomEvent.on(this.img, 'load', this._onLoad, this);
+			DomEvents.on(this.img, 'load', this._onLoad, this);
 			return this;
 		}
 		else {
@@ -46,7 +45,7 @@ SpartanJS.register('DeferredImage', function(SpartanJS) {
 			this.$img.src = this.src;
 			this.$img.setAttribute('data-width', this.img.width);
 			this.$img.setAttribute('data-height', this.img.height);
-			this.event.trigger('loaded', this);
+			this.events.trigger('loaded', this);
 		}
 	};
 
