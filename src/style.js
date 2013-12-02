@@ -7,6 +7,7 @@ SpartanJS.register('Style', function(SpartanJS) {
 		, _prefixMap
 		, nonstandard
 		, _pixelPropertyRegexp
+		, _pixelPropAxisRegexp
 		, _isPixelValueRegexp
 		, _hasUnitRegexp
 		, _nonDigitRegexp
@@ -36,24 +37,24 @@ SpartanJS.register('Style', function(SpartanJS) {
 		prefixes = ['webkit','Webkit','Moz', 'ms', 'O', 'khtml', 'Khtml'];
 
 		// TODO: IE Test
-		styles   = window.currentStyle || window.getComputedStyle(docEl, '');
+		styles = document.documentElement.currentStyle || window.getComputedStyle(docEl, '');
 		for(property in styles) {
-			if(styles.hasOwnProperty(property)) {
-				for(i = 0, n = prefixes.length; i < n; i++) {
-					prefix = prefixes[i];
-					if(property != 'length' && property.match(/[a-zA-Z]/)) {
-						if(property.indexOf(prefix) === 0) {
-							unprefixed      = property.substring(prefix.length, property.length);
-							unprefixed      = unprefixed.charAt(0).toLowerCase() + unprefixed.slice(1);
-							map[unprefixed] = property;
-							break;
-						}
-						else {
-							map[property] = property;
-						}
-					} // prefixes
-				}
-			} // styles
+			// !Important: Do not check if styles.hasOwnProperty(property).
+			// Firefox says the computed styles doesn't own the properties we need.
+			for(i = 0, n = prefixes.length; i < n; i++) {
+				prefix = prefixes[i];
+				if(property != 'length' && !Type.is('Function', property) && property.match(/[a-zA-Z]/)) {
+					if(property.indexOf(prefix) === 0) {
+						unprefixed      = property.substring(prefix.length, property.length);
+						unprefixed      = unprefixed.charAt(0).toLowerCase() + unprefixed.slice(1);
+						map[unprefixed] = property;
+						break;
+					}
+					else {
+						map[property] = property;
+					}
+				} // prefixes
+			}
 		}
 		return map;
 	})(docEl);
@@ -66,34 +67,39 @@ SpartanJS.register('Style', function(SpartanJS) {
 
 	// Convert non-pixel values to pixels values (IE<=8) element.currentStyle
 	_pixelPropertyRegexp = /(top|right|bottom|left|^(fontSize|lineHeight|width|height)$)/i;
+	_pixelPropAxisRegexp = /(right|left|^(width)$)/i;
 	_isPixelValueRegexp  = /^((-\d+\.\d+|\d+\.\d+|-\.\d+|\.\d+|-\d+|\d+)(px))?$/i;
 	_hasUnitRegexp       = /^auto$|[a-zA-Z%]$/i;
 	_nonDigitRegexp      = /[^-\d\.]/g;
-	_getPixelValue       = function(element, value) {
+	_getPixelValue       = function(element, property, value) {
 		if(_isPixelValueRegexp.test(value)) {
 			return value;
 		}
 		var style
 			, runtimeStyle
-			, hasRuntimeStyle = !!element.runtimeStyle;
+			, hasRuntimeStyle = !!element.runtimeStyle
+			, axis;
+
+		// Determine axis
+		axis = _pixelPropAxisRegexp.test(property) ? 'left' : 'top';
 
 		// Remember original values
-		style = element.style.left;
+		style = element.style[axis];
 		if(hasRuntimeStyle) {
-			runtimeStyle = element.runtimeStyle.left;
+			runtimeStyle = element.runtimeStyle[axis];
 		}
 
 		// Calculate pixel value
 		if(hasRuntimeStyle) {
-			element.runtimeStyle.left = element.currentStyle.left;
+			element.runtimeStyle[axis] = element.currentStyle[axis];
 		}
-		element.style.left = value || 0;
-		value              = element.style.pixelLeft;
+		element.style[axis] = value || 0;
+		value               = (axis == 'left') ? element.style.pixelLeft : element.style.pixelTop;
 
 		// Re-apply original values
-		element.style.left = style;
+		element.style[axis] = style;
 		if(hasRuntimeStyle) {
-			element.runtimeStyle.left = runtimeStyle;
+			element.runtimeStyle[axis] = runtimeStyle;
 		}
 
 		return value;
@@ -211,7 +217,7 @@ SpartanJS.register('Style', function(SpartanJS) {
 			value = node.currentStyle[property];
 		}
 		return _pixelPropertyRegexp.test(property)
-			? _getPixelValue(node, value)
+			? _getPixelValue(node, property, value)
 			: value;
 	};
 
