@@ -32,7 +32,7 @@ SpartanJS.register('Type', function() {
 			return obj && typeof obj === "object";
 		},
 		isWindow: function(obj) {
-			return _tests.isObject(obj) && "setInterval" in obj && obj.self === obj;
+			return _tests.isObject(obj) && "setInterval" in obj && obj.self == obj;
 		}
 	};
 
