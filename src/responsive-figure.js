@@ -44,9 +44,13 @@ SpartanJS.register('ResponsiveFigure', function(SpartanJS) {
 			var img = this.modes[this.activeMode].img;
 
 			return {
-				width: img.width,
-				height: img.height
+				width:  img.width,
+				height: img.height,
+				ratio:  img.width / img.height
 			};
+		},
+		getImage: function() {
+			return this.modes[this.activeMode].$img;
 		},
 		_checkMode: function(mode) {
 			if(!this.modes[mode]) {
