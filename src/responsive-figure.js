@@ -50,7 +50,7 @@ SpartanJS.register('ResponsiveFigure', function(SpartanJS) {
 			};
 		},
 		getImage: function() {
-			return this.modes[this.activeMode].$img;
+			return this.activeMode ? this.modes[this.activeMode].$img : undefined;
 		},
 		_checkMode: function(mode) {
 			if(!this.modes[mode]) {
@@ -72,7 +72,7 @@ SpartanJS.register('ResponsiveFigure', function(SpartanJS) {
 			queuedImage = this.modes[mode];
 
 			// If image is already active, trigger loaded callback
-			if(mode == this.activeMode) {
+			if(queuedImage.$img == this.getImage()) {
 				return this._onLoad();
 			}
 			// If image is already queued, do nothing
