@@ -46,7 +46,11 @@ SpartanJS.register('DeferredImage', function(SpartanJS) {
 			}
 		},
 		_onLoad: function() {
-			document.documentElement.removeChild(this.img);
+			try {
+				document.documentElement.removeChild(this.img);
+			} catch(e) {
+				// ignore error
+			}
 			this.loading  = false;
 			this.loaded   = true;
 			this.$img.src = this.src;
