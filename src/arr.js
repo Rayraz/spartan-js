@@ -62,26 +62,51 @@ SpartanJS.register('Arr', function() {
 		contains: function(arr, value) {
 			return this.indexOf(arr, value) > -1;
 		},
-		union: function(/* arrays */) {
-			var a, b, i, j, n, o
-				, args   = []
+		intersect: function(arr1, arr2 /* more arrays */) {
+			var a, b
+				, i, n, j, o
 				, result = [];
 
-			Array.prototype.push.apply(args, arguments);
-			a = args.shift() || [];
-			b = args.shift() || [];
+			a = arr1.slice(0) || [];
+			b = arr2.slice(0) || [];
 			n = a.length;
 			o = b.length;
 
 			for(i = 0; i < n; i++) {
 				for(j = 0; j < o; j++) {
-					if(a[i] === b[j]) {
+					if(a[i] == b[j]) {
 						result.push(a[i]);
+						break;
 					}
 				}
 			}
 
-			return (args.length) ? this.union.apply(this, [result].concat(args)) : result;
+			return (arguments.length == 2)
+				? result
+				: this.intersect.apply(this, [result].concat(
+						Array.prototype.slice.call(arguments, 2)
+					));
+		},
+		union: function(arr1, arr2 /* more arrays */) {
+			var a, b
+				, i, n;
+
+			a = arr1.slice(0) || [];
+			b = arr2.slice(0) || [];
+			n = b.length;
+
+			for(i = 0; i < n; i++) {
+				if(!this.contains(a, b[i])) {
+					a.push(b[i]);
+				}
+			}
+			console.log(arguments, a);
+
+			return (arguments.length == 2)
+				? a
+				: this.union.apply(this, [a].concat(
+						Array.prototype.slice.call(arguments, 2)
+					));
 		}
 	};
 
