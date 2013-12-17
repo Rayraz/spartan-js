@@ -223,6 +223,9 @@ SpartanJS.register('Style', function(SpartanJS) {
 
 	// Default style setter
 	_setProperty = function(node, property, value) {
+		if(value === undefined) {
+			throw new Error("Bad argument: value is undefined for property: '" + property + "'.");
+		}
 		if(_pixelPropertyRegexp.test(property)) {
 			value = _hasUnitRegexp.test(value) ? value : value + 'px';
 		}
