@@ -28,34 +28,55 @@ SpartanJS.register('Style', function(SpartanJS) {
 	_prefixMap = (function(docEl) {
 		var i, n
 			, prefixes
+			, camelCase
+			, iterate
 			, styles
 			, property
-			, prefix
-			, unprefixed
-			, map = [];
+			, map = {};
 
-		prefixes = ['webkit','Webkit','Moz', 'ms', 'O', 'khtml', 'Khtml'];
+		prefixes  = ['webkit','Webkit','Moz', 'ms', 'O', 'khtml', 'Khtml'];
+		camelCase = function(str) {
+			str = (str.charAt(0) === '-') ? str.substr(1) : str;
+			return str.replace(/-([a-z])/g, function($0, $1) {
+				return $1.toUpperCase();
+			}).replace('-', '');
+		};
+		iterate = function(property, prefixes, map) {
+			var i, n
+				, prefix
+				, unprefixed;
 
-		// TODO: IE Test
-		styles = document.documentElement.currentStyle || window.getComputedStyle(docEl, '');
-		for(property in styles) {
-			// !Important: Do not check if styles.hasOwnProperty(property).
-			// Firefox says the computed styles doesn't own the properties we need.
 			for(i = 0, n = prefixes.length; i < n; i++) {
 				prefix = prefixes[i];
-				if(property != 'length' && !Type.is('Function', property) && property.match(/[a-zA-Z]/)) {
-					if(property.indexOf(prefix) === 0) {
-						unprefixed      = property.substring(prefix.length, property.length);
-						unprefixed      = unprefixed.charAt(0).toLowerCase() + unprefixed.slice(1);
-						map[unprefixed] = property;
-						break;
-					}
-					else {
-						map[property] = property;
-					}
-				} // prefixes
+				if(property.indexOf(prefix) === 0) {
+					unprefixed      = property.substring(prefix.length, property.length);
+					unprefixed      = unprefixed.charAt(0).toLowerCase() + unprefixed.slice(1);
+					map[unprefixed] = property;
+					break;
+				}
+				else {
+					map[property] = property;
+				}
+			}
+		};
+
+		styles = document.documentElement.currentStyle || window.getComputedStyle(docEl, '');
+		// Some browsers have numerical indices for the properties, some don't
+		if(styles.length > 0) {
+			for(i = 0, n = styles.length; i < n; i++) {
+				iterate(camelCase(styles[i]), prefixes, map);
 			}
 		}
+		else {
+			for(property in styles) {
+				// !Important: Do not check if styles.hasOwnProperty(property).
+				// Firefox says the computed styles doesn't own the properties we need.
+				if(property != 'length' && !Type.is('Function', property) && property.match(/[a-zA-Z]/)) {
+					iterate(property, prefixes, map);
+				}
+			}
+		}
+
 		return map;
 	})(docEl);
 
