@@ -109,13 +109,13 @@ SpartanJS.register('DomEvents', function(SpartanJS) {
 	// -------------
 
 	_eventTags = {
-		'select': 'input',
-		'change': 'input',
-		'submit': 'form',
-		'reset':  'form',
-		'error':  'img',
-		'load':   'img',
-		'abort':  'img'
+		'onselect': 'input',
+		'onchange': 'input',
+		'onsubmit': 'form',
+		'onreset':  'form',
+		'onerror':  'img',
+		'onload':   'img',
+		'onabort':  'img'
 	};
 	_eventSupportCache = {};
 	_isEventSupported  = function(type) {
